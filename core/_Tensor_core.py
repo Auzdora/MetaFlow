@@ -11,27 +11,30 @@
 
     Created by Melrose-Lbt 2022-2-28
 """
+from typing import overload
 
 import numpy as np
 import abc
 from numpy import ndarray
 
 
+# TODO: Write Doc - Define coding style for class object (init, instantiate method define, abstractmethod define,
+#  class method define)
 class Tensor:
     def __init__(self, *args, grad_require=False):
         tensors = []
         self.parents = []
         self.children = []
-        for arg in args:
-            tensors.append(arg)
-        if len(tensors) > 1:
-            self.value = self.compute_value(*args).value
-        elif len(tensors) == 1:
-            self.value = np.array(tensors[0], dtype=float)
-        self.shape = self.value.shape
         self.grad = None
         self.grad_require = grad_require
         self.grad_fn = None
+        for arg in args:
+            tensors.append(arg)
+        if len(tensors) > 1:
+            self.value = self.compute_value(*args)
+        elif len(tensors) == 1:
+            self.value = np.array(tensors[0], dtype=float)
+        self.shape = self.value.shape
 
     def __str__(self):
         return "<{}, shape={}, dtype=Tensor.float>".format(self.value, self.shape)
@@ -54,6 +57,23 @@ class Tensor:
     def backward(self):
         pass
 
+    # Tensor op
+    def sum(self, inplace=False):
+        """
+            Add all of the values in a single Tensor.
+            :param inplace: bool -> True or False
+            If inplace is True, the function return a modified Tensor on the
+        same memory address.
+            If inplace is False, the function return a newly created Tensor
+        on a different memory address.
+        :return:
+        """
+        if inplace:
+            self.value = self.value.sum()
+            return self
+        else:
+            return Tensor(self.value.sum())
+
     @abc.abstractmethod
     def compute_value(self, *args):
         """
@@ -64,7 +84,7 @@ class Tensor:
         raise NotImplementedError
 
     @abc.abstractmethod
-    def compute_grad(self):
+    def compute_jacobi(self):
         """
             Compute gradient based on its children tensors. And return
         it to self.grad. Could be overwritten when necessary.
@@ -72,50 +92,12 @@ class Tensor:
         """
         raise NotImplementedError
 
-    # Tensor-wise OPs
-    @classmethod
-    def add(cls, tensor1, tensor2):
-        """
-            Class method for adding operation.
-            Examples:
-                Tensor.add(a, b)
-
-            :return an instantiated Tensor
-        """
-        return Tensor(np.add(tensor1.value, tensor2.value))
-
-    @classmethod
-    def mul(cls, tensor1, tensor2):
-        """
-            Element-wise multiply two tensors.
-            Examples:
-                Tensor.mul(a, b)
-
-            :return an instantiated Tensor
-        """
-        return Tensor(np.multiply(tensor1.value, tensor2.value))
-
-    @classmethod
-    def matmul(cls, tensor1, tensor2):
-        """
-            Matrix multiply.
-            Examples:
-                Tensor.matmul(a, b)
-
-            :return an instantiated Tensor
-        """
-        return Tensor(np.matmul(tensor1.value, tensor2.value))
-
-    @classmethod
-    def exp(cls, tensor):
-        """
-            Exponential operation.
-            Examples:
-                Tensor.exp(a)
-
-            :return an instantiated Tensor
-        """
-        return Tensor(np.exp(tensor.value))
+    # Set relationships between parents and children.
+    def relationship(self, *args):
+        self.grad_require = True
+        for tensor in args:
+            tensor.children.append(self)
+            self.parents.append(tensor)
 
 
 class my(Tensor):
@@ -125,5 +107,7 @@ class my(Tensor):
 
 if __name__ == "__main__":
     a = Tensor([1, 2, 3])
+    print(id(a))
     b = Tensor([2, 2, 2])
-    print(Tensor.add(a, b))
+    c = a.sum(inplace=True)
+    print(id(a), id(c))

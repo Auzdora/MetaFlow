@@ -13,31 +13,60 @@ import numpy as np
 from _Tensor_core import Tensor
 
 
-class Add(Tensor):
-    def __init__(self, *args):
-        super(Add, self).__init__(*args)
+class Operator(Tensor):
+    """
+        'Rename' Tensor class to Operator.
+    """
+    def compute_grad(self):
+        pass
 
+    def compute_jacobi(self, *args):
+        pass
+
+
+class Add(Operator):
+    """
+        Add operator.
+    """
     def compute_value(self, *args):
+        # Define relationship
+        self.relationship(*args)
+        self.grad_fn = "add"
+
+        # Compute
         tensors = []
         for arg in args:
             tensors.append(arg.value)
-        new_tensor = Tensor(np.add(*tensors))
+        return np.add(*tensors)
+
+    def compute_jacobi(self):
+        return np.mat(np.eye(self.shape))
+
+
+class Mul(Operator):
+    """
+        Mul operator.
+    """
+    def compute_value(self, *args):
         # Define relationship
-        for tensor in args:
-            tensor.children.append(new_tensor)
-            self.parents.append(tensor)
+        self.relationship(*args)
+        self.grad_fn = "multiply"
 
-        return new_tensor
+        # Compute
+        tensors = []
+        for arg in args:
+            tensors.append(arg.value)
+        return np.multiply(*tensors)
+        pass
 
-    def compute_grad(self):
+    def compute_jacobi(self):
         pass
 
 
 if __name__ == "__main__":
-    a = Tensor([1,2,3])
-    b = Tensor([2,3,4])
+    a = Tensor([[1,2,3],[3,2,1]])
+    b = Tensor([[2,3,4],[2,3,4]])
     k = Tensor([1,1,1])
-    c = Add(a, b)
-    m = Add(c,k)
-    print(m.get_parents())
+    c = Add(a,b)
+    print(np.mat(np.eye(c.shape[1])))
 
