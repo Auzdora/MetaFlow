@@ -67,6 +67,8 @@ class Tensor:
                 self.grad = np.array(np.eye(self.shape[0]))
             if self.grad_fn == "matrix multiply":
                 self.grad = 1
+            if self.grad_fn == "sum":
+                self.grad = np.array([1])
         if len(self.parents) > 0:
             for parent in self.parents:
                 if parent.grad_require:
@@ -102,10 +104,11 @@ class Tensor:
         :return: a Tensor
         """
         if inplace:
-            self.value = self.value.sum()
+            self.value = np.expand_dims(np.array(self.value.sum()), axis=0)
+            self.shape = self.value.shape
             return self
         else:
-            return Tensor(self.value.sum())
+            return Tensor(np.expand_dims(np.array(self.value.sum()), axis=0))
     # TODO: Add average
     # TODO: Add max
     # TODO: Add min

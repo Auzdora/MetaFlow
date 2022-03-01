@@ -24,6 +24,20 @@ class Operator(Tensor):
         pass
 
 
+class Sum(Operator):
+    """
+        Sum operator.
+    """
+    def compute_value(self, *args):
+        tensors = self.connect_tensor(args[0])
+        self.grad_fn = "sum"
+
+        return np.array(tensors[0]).sum()
+
+    def compute_jacobi(self, parent):
+        return np.ones((1, parent.shape[0]))
+
+
 class Add(Operator):
     """
         Add operator.
@@ -32,6 +46,21 @@ class Add(Operator):
         # Define relationship
         tensors = self.connect_tensor(*args)
         self.grad_fn = "add"
+
+        return np.add(*tensors)
+
+    def compute_jacobi(self, parent):
+        return np.array(np.eye(self.shape[0]))
+
+
+class Minus(Operator):
+    """
+        Minus operator.
+    """
+    def compute_value(self, *args):
+        # Define relationship
+        tensors = self.connect_tensor(*args)
+        self.grad_fn = "minus"
 
         return np.add(*tensors)
 
@@ -80,7 +109,11 @@ if __name__ == "__main__":
     x = Tensor([2, 3, 1])
     w = Tensor([[0.2, 0.5, 0.1], [0.1, 0.8, 0]], grad_require=True)
     b = Tensor([1, 1], grad_require=True)
-    output = Add(MatMul(w, x), b)
-    output.backward()
-    print(x.grad)
+    k = MatMul(w, x)
+    output = Add(k, b)
+    loss = Sum(output,output)
+    loss.backward()
+    print(w.grad)
+
+
 
