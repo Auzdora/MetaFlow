@@ -77,11 +77,10 @@ class MatMul(Operator):
 
 
 if __name__ == "__main__":
-    a = Tensor([0, 1])
-    print(a)
-    b = Tensor([[4, 1], [7, 6]], grad_require=True)
-    c = MatMul(b, a)
-    c.backward()
-    print(c.grad)
-    print(b.grad)
+    x = Tensor([2, 3, 1])
+    w = Tensor([[0.2, 0.5, 0.1], [0.1, 0.8, 0]], grad_require=True)
+    b = Tensor([1, 1], grad_require=True)
+    output = Add(MatMul(w, x), b)
+    output.backward()
+    print(x.grad)
 

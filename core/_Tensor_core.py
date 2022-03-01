@@ -67,12 +67,15 @@ class Tensor:
                 self.grad = np.array(np.eye(self.shape[0]))
             if self.grad_fn == "matrix multiply":
                 self.grad = 1
-        for parent in self.parents:
-            if parent.grad_require:
-                parent.grad = self.grad * self.compute_jacobi(parent)
-            else:
-                continue
-        pass
+        if len(self.parents) > 0:
+            for parent in self.parents:
+                if parent.grad_require:
+                    parent.grad = np.matmul(self.grad, self.compute_jacobi(parent))
+                    parent.backward()
+                else:
+                    continue
+        else:
+            return
 
     def connect_tensor(self, *args):
         """
