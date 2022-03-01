@@ -9,7 +9,7 @@
 """
 import dask.rewrite
 import numpy as np
-
+import utils
 from _Tensor_core import Tensor
 
 
@@ -30,17 +30,13 @@ class Add(Operator):
     """
     def compute_value(self, *args):
         # Define relationship
-        self.relationship(*args)
+        tensors = self.connect_tensor(*args)
         self.grad_fn = "add"
 
-        # Compute
-        tensors = []
-        for arg in args:
-            tensors.append(arg.value)
         return np.add(*tensors)
 
-    def compute_jacobi(self):
-        return np.mat(np.eye(self.shape))
+    def compute_jacobi(self, parent):
+        return np.array(np.eye(self.shape[0]))
 
 
 class Mul(Operator):
@@ -49,24 +45,43 @@ class Mul(Operator):
     """
     def compute_value(self, *args):
         # Define relationship
-        self.relationship(*args)
+        tensors = self.connect_tensor(*args)
         self.grad_fn = "multiply"
 
-        # Compute
-        tensors = []
-        for arg in args:
-            tensors.append(arg.value)
         return np.multiply(*tensors)
+
+    def compute_jacobi(self, parent):
         pass
 
-    def compute_jacobi(self):
-        pass
+
+class MatMul(Operator):
+    """
+        Matrix wise operator.
+    """
+    def compute_value(self, *args):
+        # Define relationship
+        tensors = self.connect_tensor(*args)
+        self.grad_fn = "matrix multiply"
+
+        return np.matmul(*tensors)
+
+    def compute_jacobi(self, parent):
+        # If self.shape is one dimensional vector, choose this
+        # TODO: Add doc, explain this code blocks
+        if parent is self.parents[0]:
+            other_parent = self.parents[1]
+        else:
+            other_parent = self.parents[0]
+        container = np.zeros((self.shape[0]*self.shape[1], parent.shape[0]*parent.shape[1]))
+        return utils.renew_to_diag(container, other_parent)
 
 
 if __name__ == "__main__":
-    a = Tensor([[1,2,3],[3,2,1]])
-    b = Tensor([[2,3,4],[2,3,4]])
-    k = Tensor([1,1,1])
-    c = Add(a,b)
-    print(np.mat(np.eye(c.shape[1])))
+    a = Tensor([0, 1])
+    print(a)
+    b = Tensor([[4, 1], [7, 6]], grad_require=True)
+    c = MatMul(b, a)
+    c.backward()
+    print(c.grad)
+    print(b.grad)
 

@@ -18,22 +18,21 @@ import abc
 from numpy import ndarray
 
 
-# TODO: Write Doc - Define coding style for class object (init, instantiate method define, abstractmethod define,
-#  class method define)
 class Tensor:
     def __init__(self, *args, grad_require=False):
-        tensors = []
         self.parents = []
         self.children = []
         self.grad = None
         self.grad_require = grad_require
         self.grad_fn = None
-        for arg in args:
-            tensors.append(arg)
-        if len(tensors) > 1:
+
+        if len(args) > 1:
             self.value = self.compute_value(*args)
-        elif len(tensors) == 1:
-            self.value = np.array(tensors[0], dtype=float)
+        elif len(args) == 1:
+            # If data is one dimensional array, it will be converted to two dimension
+            self.value = np.array(args[0], dtype=float)
+            if len(self.value.shape) == 1:
+                self.value = np.expand_dims(self.value, axis=1)
         self.shape = self.value.shape
 
     def __str__(self):
@@ -52,10 +51,41 @@ class Tensor:
         return self.children
 
     def forward(self):
+        """
+            Core method. Compute forward to get Tensors' value from
+        current Tensor.
+        """
         pass
 
     def backward(self):
+        """
+            Core method. Compute bacward to get gradient(Jacobi) from
+        current Tensor.
+        """
+        if len(self.children) == 0:
+            if self.grad_fn == "add":
+                self.grad = np.array(np.eye(self.shape[0]))
+            if self.grad_fn == "matrix multiply":
+                self.grad = 1
+        for parent in self.parents:
+            if parent.grad_require:
+                parent.grad = self.grad * self.compute_jacobi(parent)
+            else:
+                continue
         pass
+
+    def connect_tensor(self, *args):
+        """
+            Connect parent nodes and children nodes.
+            :return: tensors value list
+        """
+        self.grad_require = True
+        tensors = []
+        for tensor in args:
+            tensor.children.append(self)
+            self.parents.append(tensor)
+            tensors.append(tensor.value)
+        return tensors
 
     # Tensor op
     def sum(self, inplace=False):
@@ -66,13 +96,18 @@ class Tensor:
         same memory address.
             If inplace is False, the function return a newly created Tensor
         on a different memory address.
-        :return:
+        :return: a Tensor
         """
         if inplace:
             self.value = self.value.sum()
             return self
         else:
             return Tensor(self.value.sum())
+    # TODO: Add average
+    # TODO: Add max
+    # TODO: Add min
+    # TODO: Add argmax
+    # TODO: ...
 
     @abc.abstractmethod
     def compute_value(self, *args):
@@ -81,33 +116,17 @@ class Tensor:
         it to self.value. Could be overwritten when necessary.
         :return:
         """
-        raise NotImplementedError
 
     @abc.abstractmethod
-    def compute_jacobi(self):
+    def compute_jacobi(self, parent):
         """
             Compute gradient based on its children tensors. And return
         it to self.grad. Could be overwritten when necessary.
         :return:
         """
-        raise NotImplementedError
-
-    # Set relationships between parents and children.
-    def relationship(self, *args):
-        self.grad_require = True
-        for tensor in args:
-            tensor.children.append(self)
-            self.parents.append(tensor)
-
-
-class my(Tensor):
-    def __init__(self):
-        super().__init__()
 
 
 if __name__ == "__main__":
-    a = Tensor([1, 2, 3])
-    print(id(a))
-    b = Tensor([2, 2, 2])
-    c = a.sum(inplace=True)
-    print(id(a), id(c))
+    a = np.array([1,2,3])
+    a = Tensor(a)
+    print(a)
