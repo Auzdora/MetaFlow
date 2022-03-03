@@ -90,6 +90,8 @@ class Mul(Operator):
 class MatMul(Operator):
     """
         Matrix wise operator.
+        UseWarning: When you use this operator, you have to pay attention tensors order. Because it has two
+            different ways to compute jacobi matrix with respect to the order of tensor.
     """
     def compute_value(self, *args):
         # Define relationship
@@ -101,12 +103,28 @@ class MatMul(Operator):
     def compute_jacobi(self, parent):
         # If self.shape is one dimensional vector, choose this
         # TODO: Add doc, explain this code blocks
+        # Two important parameters
+        self_index_num = self.shape[0] * self.shape[1]
+        parent_index_num = parent.shape[0] * parent.shape[1]
+
+        # Build container
+        container = np.zeros((self_index_num, parent_index_num))
+
+        # Judge logic, Y = W * X
+        # dY / dW situation
         if parent is self.parents[0]:
             other_parent = self.parents[1]
+            return utils.renew_to_diag(container, other_parent)
+        # dY / dX situation
         else:
             other_parent = self.parents[0]
-        container = np.zeros((self.shape[0]*self.shape[1], parent.shape[0]*parent.shape[1]))
-        return utils.renew_to_diag(container, other_parent)
+            jacobi = utils.renew_to_diag(container, other_parent, w_or_x=False)
+            row_order = np.arange(0, self_index_num).reshape(self.shape[1], self.shape[0]).\
+                T.reshape(self_index_num)
+            col_order = np.arange(0, parent_index_num).reshape(parent.shape[1], parent.shape[0]).\
+                T.reshape(parent_index_num)
+            a = jacobi[row_order, :][:, col_order]
+            return jacobi[row_order, :][:, col_order]
 
 
 class LossMSE(Operator):
@@ -133,6 +151,8 @@ class LossMSE(Operator):
 
 
 if __name__ == "__main__":
+    import time
+    past = time.time()
     x = Tensor([2, 3, 1])
     w1 = Tensor([[0.2, -0.1, 0.1], [-0.12, 0.05, 0.3]], grad_require=True)
     b1 = Tensor([1, 1], grad_require=True)
@@ -141,15 +161,18 @@ if __name__ == "__main__":
     label = np.array([7, 9])
     for epoch in range(20):
         #output = Add(MatMul(w2, Add(MatMul(w1, x), b1)), b2)
-        output = MatMul(w2, Add(MatMul(w1, x), b1))
-        loss = LossMSE(label, output)
+        n = MatMul(w1, x)
+        z = Add(n, b1)
+        c = MatMul(w2, z)
+        #output = MatMul(w2, Add(MatMul(w1, x), b1))
+        loss = LossMSE(label, c)
         loss.backward()
-        print(w2.grad.reshape(2,2))
         w1.value = w1.value - 0.01 * w1.grad.reshape(2,3)
         w2.value = w2.value - 0.01 * w2.grad.reshape(2,2)
         b1.value = b1.value - 0.01 * b1.grad.reshape(2,1)
         #b2.value = b2.value - 0.01 * b2.grad.reshape(2,1)
         print("epoch{}: loss:{}".format(epoch, loss))
-
+    now = time.time()
+    print("run time:{}s".format(now-past))
 
 

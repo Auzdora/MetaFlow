@@ -10,7 +10,7 @@
 import numpy as np
 
 
-def renew_to_diag(container, parent_tensor):
+def renew_to_diag(container, parent_tensor, w_or_x=True):
     """
         This function provides a method for ./core/_Operatiors.py/MatMul.compute_jacobi.
     It takes a created container which full of zeros and a parent Tensor. And then refresh
@@ -20,7 +20,12 @@ def renew_to_diag(container, parent_tensor):
     :return: a renewed container
     """
     # Get important parameters
-    value_t = parent_tensor.value.T
+    if w_or_x:
+        # If w_or_x is true, that means we are compute dY/dW where Y=WX
+        value_t = parent_tensor.value.T
+    else:
+        # If w_or_x is false, that means we are compute dY/dX where Y=WX
+        value_t = parent_tensor.value
     row_step = value_t.shape[0]
     col_step = value_t.shape[1]
     iter_num = container.shape[0]/row_step
@@ -32,7 +37,11 @@ def renew_to_diag(container, parent_tensor):
 
 
 if __name__ == "__main__":
-    a = np.array([0,1])
-    b = np.array([[4,1],[7,6]])
-    a = np.expand_dims(a, axis=1)
-    print(np.matmul(b,a))
+    k = 2
+    a = np.zeros((4,4))
+    b = np.array([[2,3],[4,1]])
+    c = np.array([1,-1])
+    print(np.dot(c,b))
+    #new = np.zeros(((b.shape[0]-1)*k+1,(b.shape[1]-1)*k+1))
+    print(np.arange(0,12).reshape(4,3).T.reshape(12))
+    print(b[[1,0],:][:,[1,0]])
