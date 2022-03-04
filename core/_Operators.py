@@ -132,7 +132,7 @@ class LossMSE(Operator):
         Mean square error loss function.
     """
     def __init__(self, label, outputs):
-        self.label = np.expand_dims(label,axis=1)
+        self.label = np.expand_dims(label, axis=1)
         self.output = [outputs]
         # Number of samples
         self.N = len(label)
@@ -156,21 +156,17 @@ if __name__ == "__main__":
     x = Tensor([2, 3, 1])
     w1 = Tensor([[0.2, -0.1, 0.1], [-0.12, 0.05, 0.3]], grad_require=True)
     b1 = Tensor([1, 1], grad_require=True)
-    w2 = Tensor([[0.1, 0.2], [0.1, -0.1]], grad_require=True)
-    b2 = Tensor([1, 1], grad_require=True)
-    label = np.array([7, 9])
-    for epoch in range(20):
-        #output = Add(MatMul(w2, Add(MatMul(w1, x), b1)), b2)
-        n = MatMul(w1, x)
-        z = Add(n, b1)
-        c = MatMul(w2, z)
-        #output = MatMul(w2, Add(MatMul(w1, x), b1))
-        loss = LossMSE(label, c)
+    w2 = Tensor([[0.1, 0.2]], grad_require=True)
+    b2 = Tensor([1], grad_require=True)
+    label = np.array([7])
+    for epoch in range(1000):
+        output = Add(MatMul(w2, Add(MatMul(w1, x), b1)), b2)
+        loss = LossMSE(label, output)
         loss.backward()
         w1.value = w1.value - 0.01 * w1.grad.reshape(2,3)
-        w2.value = w2.value - 0.01 * w2.grad.reshape(2,2)
+        w2.value = w2.value - 0.01 * w2.grad.reshape(1,2)
         b1.value = b1.value - 0.01 * b1.grad.reshape(2,1)
-        #b2.value = b2.value - 0.01 * b2.grad.reshape(2,1)
+        b2.value = b2.value - 0.01 * b2.grad.reshape(1,1)
         print("epoch{}: loss:{}".format(epoch, loss))
     now = time.time()
     print("run time:{}s".format(now-past))

@@ -11,11 +11,11 @@
 
     Created by Melrose-Lbt 2022-2-28
 """
-from typing import overload
 
 import numpy as np
 import abc
 from numpy import ndarray
+from typing import overload
 
 
 class Tensor:
@@ -39,7 +39,7 @@ class Tensor:
         self.shape = self.value.shape
 
     def __str__(self):
-        return "<{}, shape={}, dtype=Tensor.float>".format(self.value, self.shape)
+        return "Tensor({}, shape={}, dtype=Tensor.float)".format(self.value, self.shape)
 
     def get_parents(self):
         """
