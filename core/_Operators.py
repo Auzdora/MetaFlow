@@ -18,7 +18,7 @@ class Operator(Tensor):
     """
         'Rename' Tensor class to Operator.
     """
-    def compute_grad(self):
+    def compute_value(self, *args):
         pass
 
     def compute_jacobi(self, *args):
@@ -132,42 +132,21 @@ class MatMul(Operator):
             return jacobi[row_order, :][:, col_order]
 
 
-class LossMSE(Operator):
-    """
-        Mean square error loss function.
-    """
-    def __init__(self, label, outputs):
-        self.label = np.expand_dims(label, axis=1)
-
-        # Number of samples
-        self.N = len(label)
-        self.jacobi_coef = 2/self.N
-        super(LossMSE, self).__init__(*[outputs], grad_fn='<LossMSE>', special_op=True)
-
-    def compute_value(self, *args):
-        # TODO: Add assert to make sure label dim equals to output dim
-        outputs = self.connect_tensor(args[0])
-        return (((outputs[0]-self.label)**2).sum())/self.N
-
-    def compute_jacobi(self, parent):
-        # TODO:Explain here why we need add .T
-        return self.jacobi_coef * (parent.value - self.label).T
-
-
 if __name__ == "__main__":
     import time
     import sys
     from sys import getsizeof
     import gc
     from _Module import Modules
+    from loss_fn import LossMSE
 
     class Model(Modules):
         def __init__(self):
             super(Model, self).__init__()
-            self.w1 = Tensor.random((2, 3), grad_require=True)
-            self.b1 = Tensor.random((2, 1), grad_require=True)
-            self.w2 = Tensor.random((1, 2), grad_require=True)
-            self.b2 = Tensor.random((1, 1), grad_require=True)
+            self.w1 = Tensor([[0.2, -0.1, 0.1], [-0.12, 0.05, 0.3]], grad_require=True)
+            self.b1 = Tensor([1,1], grad_require=True)
+            self.w2 = Tensor([[0.1, 0.2]], grad_require=True)
+            self.b2 = Tensor([1], grad_require=True)
 
         def forward(self, i):
             i = MatMul(self.w1, i)
@@ -180,7 +159,7 @@ if __name__ == "__main__":
     x = Tensor([2, 3, 1])
     model = Model()
     label = np.array([7])
-    for epoch in range(100):
+    for epoch in range(1000):
         output = model(x)
         loss = LossMSE(label, output)
         loss.backward()

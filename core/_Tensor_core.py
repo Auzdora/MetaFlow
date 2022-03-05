@@ -80,7 +80,7 @@ class Tensor:
         for example:
             for epoch in range(100):
                 output = model(x)
-                loss = LossXXXX()
+                loss = LossMSE()
                 loss.backward()
                 ...
                 loss.clear()
