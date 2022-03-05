@@ -14,9 +14,7 @@
 
 import numpy as np
 import abc
-
 from numpy import ndarray
-
 from _Constants import OP_LIST
 
 
@@ -41,15 +39,15 @@ class Tensor:
         """
             This function handles Tensor's value problem. Because users or developers could
         input any kind of data structure, there are some of examples down here:
-            1. USERS:  When you create a Tensor which your input is clear: a = Tensor([1,2,3]).
+            1. [USERS]:  When you create a Tensor which your input is clear: a = Tensor([1,2,3]).
             In this situation, your input is a single list.
-            2. USERS:  When you create a Tensor which your input is its shape: a = Tensor((2,3)).
+            2. [USERS]:  When you create a Tensor which your input is its shape: a = Tensor((2,3)).
             In this situation, your input is a single tuple.
-            3. DEVELOPERS: When you create a sub class like Operator or Optimizer, you need to
+            3. [DEVELOPERS]: When you create a sub class like Operator or Optimizer, you need to
             inherit from Tensor. These sub classes may have multiple input Tensors, for example,
             MatMul(Tensor1, Tensor2) / Add(Tensor1, Tensor2)
         :param args:
-        :return:
+        :return: value
         """
         if self.grad_fn is None:
             # That means user want to create a Tensor variable, *args' type could be list and tuple.
