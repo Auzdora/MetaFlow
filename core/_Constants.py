@@ -1,0 +1,1 @@
+OP_LIST = ['<TensorSum>', '<TensorAdd>', '<TensorMinus>', '<TensorMul>', '<TensorMatMul>', '<LossMSE>']

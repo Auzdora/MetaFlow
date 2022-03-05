@@ -7,7 +7,6 @@
 
     Created by Melrose-Lbt 2022-2-28
 """
-import dask.rewrite
 import numpy as np
 import utils
 from _Tensor_core import Tensor
@@ -34,7 +33,7 @@ class Sum(Operator):
 
     def compute_value(self, *args):
         tensors = self.connect_tensor(args[0])
-        self.grad_fn = "sum"
+        self.grad_fn = '<TensorSum>'
 
         return np.array(tensors[0]).sum()
 
@@ -49,7 +48,7 @@ class Add(Operator):
     def compute_value(self, *args):
         # Define relationship
         tensors = self.connect_tensor(*args)
-        self.grad_fn = "add"
+        self.grad_fn = '<TensorAdd>'
 
         return np.add(*tensors)
 
@@ -64,7 +63,7 @@ class Minus(Operator):
     def compute_value(self, *args):
         # Define relationship
         tensors = self.connect_tensor(*args)
-        self.grad_fn = "minus"
+        self.grad_fn = '<TensorMinus>'
 
         return np.add(*tensors)
 
@@ -79,7 +78,7 @@ class Mul(Operator):
     def compute_value(self, *args):
         # Define relationship
         tensors = self.connect_tensor(*args)
-        self.grad_fn = "multiply"
+        self.grad_fn = '<TensorMul>'
 
         return np.multiply(*tensors)
 
@@ -96,7 +95,7 @@ class MatMul(Operator):
     def compute_value(self, *args):
         # Define relationship
         tensors = self.connect_tensor(*args)
-        self.grad_fn = "matrix multiply"
+        self.grad_fn = '<TensorMatMul>'
 
         return np.matmul(*tensors)
 
@@ -123,7 +122,6 @@ class MatMul(Operator):
                 T.reshape(self_index_num)
             col_order = np.arange(0, parent_index_num).reshape(parent.shape[1], parent.shape[0]).\
                 T.reshape(parent_index_num)
-            a = jacobi[row_order, :][:, col_order]
             return jacobi[row_order, :][:, col_order]
 
 
@@ -142,7 +140,7 @@ class LossMSE(Operator):
     def compute_value(self, *args):
         # TODO: Add assert to make sure label dim equals to output dim
         outputs = self.connect_tensor(args[0])
-        self.grad_fn = "mse"
+        self.grad_fn = '<LossMSE>'
         return (((outputs[0]-self.label)**2).sum())/self.N
 
     def compute_jacobi(self, parent):
