@@ -139,11 +139,11 @@ class LossMSE(Operator):
     """
     def __init__(self, label, outputs):
         self.label = np.expand_dims(label, axis=1)
-        self.output = [outputs]
+
         # Number of samples
         self.N = len(label)
         self.jacobi_coef = 2/self.N
-        super(LossMSE, self).__init__(*self.output, grad_fn='<LossMSE>', special_op=True)
+        super(LossMSE, self).__init__(*[outputs], grad_fn='<LossMSE>', special_op=True)
 
     def compute_value(self, *args):
         # TODO: Add assert to make sure label dim equals to output dim
@@ -157,33 +157,33 @@ class LossMSE(Operator):
 
 if __name__ == "__main__":
     import time
+    import sys
+    from sys import getsizeof
+    import gc
+
     past = time.time()
     x = Tensor([2, 3, 1])
-    w1 = Tensor.random((2, 3), grad_require=True)
-    w2 = Tensor.random((2, 2), grad_require=True)
-    #w1 = Tensor([[0.2, -0.1, 0.1], [-0.12, 0.05, 0.3]], grad_require=True)
+    #w1 = Tensor.random((2, 3), grad_require=True)
+    #w2 = Tensor.random((2, 2), grad_require=True)
+    w1 = Tensor([[0.2, -0.1, 0.1], [-0.12, 0.05, 0.3]], grad_require=True)
     b1 = Tensor([1, 1], grad_require=True)
-    #w2 = Tensor([[0.1, 0.2]], grad_require=True)
-    b2 = Tensor([1, 1], grad_require=True)
-    label = np.array([7, 9])
-    output = Add(MatMul(w2, Add(MatMul(w1, x), b1)), b2)
-    for epoch in range(100):
+    w2 = Tensor([[0.1, 0.2]], grad_require=True)
+    b2 = Tensor([1], grad_require=True)
+    label = np.array([7])
+    for epoch in range(1000):
+        # n = MatMul(w1, x)
+        # c = Add(n, b1)
+        # b = MatMul(w2, c)
+        # output = Add(b, b2)
         output = Add(MatMul(w2, Add(MatMul(w1, x), b1)), b2)
         loss = LossMSE(label, output)
         loss.backward()
         w1.value = w1.value - 0.01 * w1.grad.reshape(2,3)
-        w2.value = w2.value - 0.01 * w2.grad.reshape(2,2)
+        w2.value = w2.value - 0.01 * w2.grad.reshape(1,2)
         b1.value = b1.value - 0.01 * b1.grad.reshape(2,1)
-        b2.value = b2.value - 0.01 * b2.grad.reshape(2,1)
+        b2.value = b2.value - 0.01 * b2.grad.reshape(1,1)
         print("epoch{}: loss:{}".format(epoch, loss))
+        loss.clear()
+
     now = time.time()
     print("run time:{}s".format(now-past))
-
-    class A:
-        pass
-    for i in range(10):
-        c = A()
-        print(c)
-
-
-

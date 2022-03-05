@@ -74,6 +74,34 @@ class Tensor:
             else:
                 return self.compute_value(*args)
 
+    def clear(self):
+        """
+            In this version, you need to call clear() with your end node in compute graph,
+        for example:
+            for epoch in range(100):
+                output = model(x)
+                loss = LossXXXX()
+                loss.backward()
+                ...
+                loss.clear()
+            You need to call this at every end of epoch to make sure memory won't blow up.
+            This function aims at decoupling each Tensor in compute graph, by doing this,
+        every object's reference count will go down to zero after each epoch, so python
+        could call 'def __del__(self)' method automatically to delete release memory space.
+        """
+        # Leaf node decoupling
+        if len(self.parents) == 0:
+            self.parents = []
+            self.children = []
+            return
+
+        # Other node decoupling
+        if len(self.parents) > 0:
+            for parent in self.parents:
+                parent.children = []
+                parent.clear()
+            self.parents = []
+
     def get_parents(self):
         """
             Get this Tensor's parents list.
