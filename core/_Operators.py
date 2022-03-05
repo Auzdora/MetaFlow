@@ -7,6 +7,8 @@
 
     Created by Melrose-Lbt 2022-2-28
 """
+import abc
+
 import numpy as np
 import utils
 from _Tensor_core import Tensor
@@ -157,28 +159,35 @@ if __name__ == "__main__":
     import sys
     from sys import getsizeof
     import gc
+    from _Module import Modules
+
+    class Model(Modules):
+        def __init__(self):
+            super(Model, self).__init__()
+            self.w1 = Tensor.random((2, 3), grad_require=True)
+            self.b1 = Tensor.random((2, 1), grad_require=True)
+            self.w2 = Tensor.random((1, 2), grad_require=True)
+            self.b2 = Tensor.random((1, 1), grad_require=True)
+
+        def forward(self, i):
+            i = MatMul(self.w1, i)
+            i = Add(i, self.b1)
+            i = MatMul(self.w2, i)
+            i = Add(i, self.b2)
+            return i
 
     past = time.time()
     x = Tensor([2, 3, 1])
-    #w1 = Tensor.random((2, 3), grad_require=True)
-    #w2 = Tensor.random((2, 2), grad_require=True)
-    w1 = Tensor([[0.2, -0.1, 0.1], [-0.12, 0.05, 0.3]], grad_require=True)
-    b1 = Tensor([1, 1], grad_require=True)
-    w2 = Tensor([[0.1, 0.2]], grad_require=True)
-    b2 = Tensor([1], grad_require=True)
+    model = Model()
     label = np.array([7])
-    for epoch in range(1000):
-        # n = MatMul(w1, x)
-        # c = Add(n, b1)
-        # b = MatMul(w2, c)
-        # output = Add(b, b2)
-        output = Add(MatMul(w2, Add(MatMul(w1, x), b1)), b2)
+    for epoch in range(100):
+        output = model(x)
         loss = LossMSE(label, output)
         loss.backward()
-        w1.value = w1.value - 0.01 * w1.grad.reshape(2,3)
-        w2.value = w2.value - 0.01 * w2.grad.reshape(1,2)
-        b1.value = b1.value - 0.01 * b1.grad.reshape(2,1)
-        b2.value = b2.value - 0.01 * b2.grad.reshape(1,1)
+        model.w1.value = model.w1.value - 0.01 * model.w1.grad.reshape(2,3)
+        model.w2.value = model.w2.value - 0.01 * model.w2.grad.reshape(1,2)
+        model.b1.value = model.b1.value - 0.01 * model.b1.grad.reshape(2,1)
+        model.b2.value = model.b2.value - 0.01 * model.b2.grad.reshape(1,1)
         print("epoch{}: loss:{}".format(epoch, loss))
         loss.clear()
 

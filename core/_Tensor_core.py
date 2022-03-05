@@ -207,10 +207,4 @@ class Tensor:
 
 
 if __name__ == "__main__":
-    import _Operators
-    k = Tensor.random((2,3))
-    print(k.children)
-    a = Tensor([1, 1, 1])
-    print(a.shape)
-    b = Tensor([[2, 5, 1], [1, 1, 1], [2, 2, 2]])
-    print(_Operators.Sum(b))
+    pass
