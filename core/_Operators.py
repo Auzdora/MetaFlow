@@ -28,13 +28,11 @@ class Sum(Operator):
         Sum operator.
     """
     def __init__(self, tensor):
-        args = [tensor]
-        super(Sum, self).__init__(*args, special_op=True)
+        # tensor is a <__main__.Tensor object at 0x7f77c0770100>
+        super(Sum, self).__init__(tensor, grad_fn='<TensorSum>', special_op=True)
 
     def compute_value(self, *args):
         tensors = self.connect_tensor(args[0])
-        self.grad_fn = '<TensorSum>'
-
         return np.array(tensors[0]).sum()
 
     def compute_jacobi(self, parent):
@@ -45,10 +43,13 @@ class Add(Operator):
     """
         Add operator.
     """
+    def __init__(self, *args):
+        super(Add, self).__init__(*args, grad_fn='<TensorAdd>')
+
     def compute_value(self, *args):
         # Define relationship
         tensors = self.connect_tensor(*args)
-        self.grad_fn = '<TensorAdd>'
+        #self.grad_fn = '<TensorAdd>'
 
         return np.add(*tensors)
 
@@ -60,11 +61,13 @@ class Minus(Operator):
     """
         Minus operator.
     """
+    def __init__(self, *args):
+        super(Minus, self).__init__(*args, grad_fn='<TensorMinus>')
+
     def compute_value(self, *args):
         # Define relationship
         tensors = self.connect_tensor(*args)
-        self.grad_fn = '<TensorMinus>'
-
+        # TODO: np.add??? For minus??
         return np.add(*tensors)
 
     def compute_jacobi(self, parent):
@@ -75,6 +78,9 @@ class Mul(Operator):
     """
         Mul operator.
     """
+    def __init__(self, *args):
+        super(Mul, self).__init__(*args, grad_fn='<TensorMul>')
+
     def compute_value(self, *args):
         # Define relationship
         tensors = self.connect_tensor(*args)
@@ -92,10 +98,12 @@ class MatMul(Operator):
         UseWarning: When you use this operator, you have to pay attention tensors order. Because it has two
             different ways to compute jacobi matrix with respect to the order of tensor.
     """
+    def __init__(self, *args):
+        super(MatMul, self).__init__(*args, grad_fn='<TensorMatMul>')
+
     def compute_value(self, *args):
         # Define relationship
         tensors = self.connect_tensor(*args)
-        self.grad_fn = '<TensorMatMul>'
 
         return np.matmul(*tensors)
 
@@ -135,12 +143,11 @@ class LossMSE(Operator):
         # Number of samples
         self.N = len(label)
         self.jacobi_coef = 2/self.N
-        super(LossMSE, self).__init__(*self.output, special_op=True)
+        super(LossMSE, self).__init__(*self.output, grad_fn='<LossMSE>', special_op=True)
 
     def compute_value(self, *args):
         # TODO: Add assert to make sure label dim equals to output dim
         outputs = self.connect_tensor(args[0])
-        self.grad_fn = '<LossMSE>'
         return (((outputs[0]-self.label)**2).sum())/self.N
 
     def compute_jacobi(self, parent):

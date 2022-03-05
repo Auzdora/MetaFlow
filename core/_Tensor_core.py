@@ -14,30 +14,35 @@
 
 import numpy as np
 import abc
+
+from numpy import ndarray
+
 from _Constants import OP_LIST
 
 
 class Tensor:
-    def __init__(self, *args, grad_require=False, special_op=False):
-        # args insurance
+    def __init__(self, *args, grad_fn=None, grad_require=False, special_op=False):
+        # The number of Tensors version control, this version does not support multiple params(above 2) operations.
         assert len(args) < 3, "Input over 2 tensors is not supported in this version yet."
-
         self.parents = []
         self.children = []
         self.grad = None
         self.grad_require = grad_require
-        self.grad_fn = None
+        self.grad_fn = grad_fn
+        # special_op is a params that need to be enabled at operator __init__ process.
+        self.special_op = special_op
 
-        if special_op is False:
-            if len(args) > 1:
-                self.value = self.compute_value(*args)
-            elif len(args) == 1:
-                # If data is one dimensional array, it will be converted to two dimension
-                self.value = np.array(args[0], dtype=float)
-                if len(self.value.shape) == 1:
-                    self.value = np.expand_dims(self.value, axis=1)
-        else:
-            self.value = np.expand_dims(self.compute_value(*args), axis=0)
+        # if special_op is False:
+        #     if len(args) > 1:
+        #         self.value = self.compute_value(*args)
+        #     elif len(args) == 1:
+        #         # If data is one dimensional array, it will be converted to two dimension
+        #         self.value = np.array(args[0], dtype=float)
+        #         if len(self.value.shape) == 1:
+        #             self.value = np.expand_dims(self.value, axis=1)
+        # else:
+        #     self.value = np.expand_dims(self.compute_value(*args), axis=0)
+        self.value = self.value_config(*args)
         self.shape = self.value.shape
 
     def __str__(self):
@@ -57,10 +62,30 @@ class Tensor:
         :param args:
         :return:
         """
-        if isinstance(args, list):
-            pass
-        elif isinstance(args, tuple):
-            pass
+        if self.grad_fn is None:
+            # That means user want to create a Tensor variable, *args' type could be list and tuple.
+            if isinstance(args[0], list):
+                assert len(args) == 1, "If you want to create a Tensor, you could only input one list instead of " \
+                                       "others. "
+                if self.special_op:
+                    return np.expand_dims(self.compute_value(*args), axis=0)
+                # If data is one dimensional array, it will be converted to two dimension
+                else:
+                    value = np.array(args[0], dtype=float)
+                    if len(value.shape) == 1:
+                        return np.expand_dims(value, axis=1)
+                    return value
+
+            elif isinstance(args[0], tuple):
+                pass
+            elif isinstance(args[0], ndarray):
+                pass
+
+        elif self.grad_fn in OP_LIST:
+            if self.special_op:
+                return np.expand_dims(self.compute_value(*args), axis=0)
+            else:
+                return self.compute_value(*args)
 
     def get_parents(self):
         """
@@ -157,5 +182,7 @@ class Tensor:
 
 
 if __name__ == "__main__":
-    k = Tensor([2,2,3], [2,2,4], [2,3,4])
-    print(k)
+    import _Operators
+    a = Tensor([1,1,1])
+    b = Tensor([[2,5,1],[1,1,1],[2,2,2]])
+    print(_Operators.Sum(b))
