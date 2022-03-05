@@ -31,22 +31,11 @@ class Tensor:
         self.grad_fn = grad_fn
         # special_op is a params that need to be enabled at operator __init__ process.
         self.special_op = special_op
-
-        # if special_op is False:
-        #     if len(args) > 1:
-        #         self.value = self.compute_value(*args)
-        #     elif len(args) == 1:
-        #         # If data is one dimensional array, it will be converted to two dimension
-        #         self.value = np.array(args[0], dtype=float)
-        #         if len(self.value.shape) == 1:
-        #             self.value = np.expand_dims(self.value, axis=1)
-        # else:
-        #     self.value = np.expand_dims(self.compute_value(*args), axis=0)
         self.value = self.value_config(*args)
         self.shape = self.value.shape
 
-    def __str__(self):
-        return "Tensor({}, shape={}, dtype=Tensor.float)".format(self.value, self.shape)
+    # def __str__(self):
+    #     return "Tensor({}, shape={}, dtype=Tensor.float)".format(self.value, self.shape)
 
     def value_config(self, *args):
         """
@@ -64,22 +53,20 @@ class Tensor:
         """
         if self.grad_fn is None:
             # That means user want to create a Tensor variable, *args' type could be list and tuple.
-            if isinstance(args[0], list):
+            if isinstance(args[0], list) or isinstance(args[0], ndarray):
                 assert len(args) == 1, "If you want to create a Tensor, you could only input one list instead of " \
                                        "others. "
-                if self.special_op:
-                    return np.expand_dims(self.compute_value(*args), axis=0)
+                value = np.array(args[0], dtype=float)
+
+                assert len(value.shape) > 0, "You have to use numpy create at least one dimensional vector instead " \
+                                             "of a value. "
                 # If data is one dimensional array, it will be converted to two dimension
-                else:
-                    value = np.array(args[0], dtype=float)
-                    if len(value.shape) == 1:
-                        return np.expand_dims(value, axis=1)
-                    return value
+                if len(value.shape) == 1:
+                    return np.expand_dims(value, axis=1)
+                return value
 
             elif isinstance(args[0], tuple):
-                pass
-            elif isinstance(args[0], ndarray):
-                pass
+                return np.random.random(args[0])
 
         elif self.grad_fn in OP_LIST:
             if self.special_op:
@@ -91,12 +78,16 @@ class Tensor:
         """
             Get this Tensor's parents list.
         """
+        if len(self.parents) == 0:
+            return None
         return self.parents
 
-    def get_child(self):
+    def get_children(self):
         """
             Get this Tensor's children list.
         """
+        if len(self.children) == 0:
+            return None
         return self.children
 
     def forward(self):
@@ -118,6 +109,7 @@ class Tensor:
 
             if self.grad_fn == '<TensorSum>' or self.grad_fn == '<LossMSE>' or '<TensorMatMul>':
                 self.grad = 1
+
         # If this node doesn't have parent node, that means it has no need to backpropagation
         if len(self.parents) > 0:
             for parent in self.parents:
@@ -160,6 +152,7 @@ class Tensor:
             return self
         else:
             return Tensor(np.expand_dims(np.array(self.value.sum()), axis=0))
+
     # TODO: Add average
     # TODO: Add max
     # TODO: Add min
@@ -180,9 +173,16 @@ class Tensor:
         it to self.grad. Could be overwritten when necessary.
         """
 
+    @classmethod
+    def random(cls, tuple, grad_require=False):
+        return Tensor(np.random.random(tuple), grad_require=grad_require)
+
 
 if __name__ == "__main__":
     import _Operators
-    a = Tensor([1,1,1])
-    b = Tensor([[2,5,1],[1,1,1],[2,2,2]])
+    k = Tensor.random((2,3))
+    print(k.children)
+    a = Tensor([1, 1, 1])
+    print(a.shape)
+    b = Tensor([[2, 5, 1], [1, 1, 1], [2, 2, 2]])
     print(_Operators.Sum(b))
