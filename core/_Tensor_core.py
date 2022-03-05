@@ -34,8 +34,8 @@ class Tensor:
         self.value = self.value_config(*args)
         self.shape = self.value.shape
 
-    # def __str__(self):
-    #     return "Tensor({}, shape={}, dtype=Tensor.float)".format(self.value, self.shape)
+    def __str__(self):
+        return "Tensor({}, shape={}, dtype=Tensor.float)".format(self.value, self.shape)
 
     def value_config(self, *args):
         """

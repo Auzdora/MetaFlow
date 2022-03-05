@@ -48,10 +48,8 @@ class Add(Operator):
 
     def compute_value(self, *args):
         # Define relationship
-        tensors = self.connect_tensor(*args)
-        #self.grad_fn = '<TensorAdd>'
-
-        return np.add(*tensors)
+        tensors_list = self.connect_tensor(*args)
+        return np.add(*tensors_list)
 
     def compute_jacobi(self, parent):
         return np.array(np.eye(self.shape[0]))
@@ -161,29 +159,42 @@ if __name__ == "__main__":
     from sys import getsizeof
     import gc
 
-    past = time.time()
-    x = Tensor([2, 3, 1])
-    #w1 = Tensor.random((2, 3), grad_require=True)
-    #w2 = Tensor.random((2, 2), grad_require=True)
-    w1 = Tensor([[0.2, -0.1, 0.1], [-0.12, 0.05, 0.3]], grad_require=True)
-    b1 = Tensor([1, 1], grad_require=True)
-    w2 = Tensor([[0.1, 0.2]], grad_require=True)
-    b2 = Tensor([1], grad_require=True)
-    label = np.array([7])
-    for epoch in range(1000):
-        # n = MatMul(w1, x)
-        # c = Add(n, b1)
-        # b = MatMul(w2, c)
-        # output = Add(b, b2)
-        output = Add(MatMul(w2, Add(MatMul(w1, x), b1)), b2)
-        loss = LossMSE(label, output)
-        loss.backward()
-        w1.value = w1.value - 0.01 * w1.grad.reshape(2,3)
-        w2.value = w2.value - 0.01 * w2.grad.reshape(1,2)
-        b1.value = b1.value - 0.01 * b1.grad.reshape(2,1)
-        b2.value = b2.value - 0.01 * b2.grad.reshape(1,1)
-        print("epoch{}: loss:{}".format(epoch, loss))
-        loss.clear()
+    # past = time.time()
+    # x = Tensor([2, 3, 1])
+    # #w1 = Tensor.random((2, 3), grad_require=True)
+    # #w2 = Tensor.random((2, 2), grad_require=True)
+    # w1 = Tensor([[0.2, -0.1, 0.1], [-0.12, 0.05, 0.3]], grad_require=True)
+    # b1 = Tensor([1, 1], grad_require=True)
+    # w2 = Tensor([[0.1, 0.2]], grad_require=True)
+    # b2 = Tensor([1], grad_require=True)
+    # label = np.array([7])
+    # for epoch in range(1000):
+    #     # n = MatMul(w1, x)
+    #     # c = Add(n, b1)
+    #     # b = MatMul(w2, c)
+    #     # output = Add(b, b2)
+    #     output = Add(MatMul(w2, Add(MatMul(w1, x), b1)), b2)
+    #     loss = LossMSE(label, output)
+    #     loss.backward()
+    #     w1.value = w1.value - 0.01 * w1.grad.reshape(2,3)
+    #     w2.value = w2.value - 0.01 * w2.grad.reshape(1,2)
+    #     b1.value = b1.value - 0.01 * b1.grad.reshape(2,1)
+    #     b2.value = b2.value - 0.01 * b2.grad.reshape(1,1)
+    #     print("epoch{}: loss:{}".format(epoch, loss))
+    #     loss.clear()
+    #
+    # now = time.time()
+    # print("run time:{}s".format(now-past))
+    a = Tensor([1,2,3])
+    b = Tensor([4,5,6]).sum()
+    c = Add(a, b)
+    #c = Tensor([1])
+    print(sys.getrefcount(a))
+    print(sys.getrefcount(b))
 
-    now = time.time()
-    print("run time:{}s".format(now-past))
+    print('--------')
+    c.parents = []
+    c.children = []
+    print(sys.getrefcount(c))
+    del c
+    print('--------')
