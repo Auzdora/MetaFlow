@@ -11,7 +11,7 @@ import abc
 
 import numpy as np
 import utils
-from _Tensor_core import Tensor
+from ._Tensor_core import Tensor
 
 
 class Operator(Tensor):
@@ -133,42 +133,4 @@ class MatMul(Operator):
 
 
 if __name__ == "__main__":
-    import time
-    import sys
-    from sys import getsizeof
-    import gc
-    from _Module import Modules
-    from loss_fn import LossMSE
-
-    class Model(Modules):
-        def __init__(self):
-            super(Model, self).__init__()
-            self.w1 = Tensor([[0.2, -0.1, 0.1], [-0.12, 0.05, 0.3]], grad_require=True)
-            self.b1 = Tensor([1,1], grad_require=True)
-            self.w2 = Tensor([[0.1, 0.2]], grad_require=True)
-            self.b2 = Tensor([1], grad_require=True)
-
-        def forward(self, i):
-            i = MatMul(self.w1, i)
-            i = Add(i, self.b1)
-            i = MatMul(self.w2, i)
-            i = Add(i, self.b2)
-            return i
-
-    past = time.time()
-    x = Tensor([2, 3, 1])
-    model = Model()
-    label = np.array([7])
-    for epoch in range(1000):
-        output = model(x)
-        loss = LossMSE(label, output)
-        loss.backward()
-        model.w1.value = model.w1.value - 0.01 * model.w1.grad.reshape(2,3)
-        model.w2.value = model.w2.value - 0.01 * model.w2.grad.reshape(1,2)
-        model.b1.value = model.b1.value - 0.01 * model.b1.grad.reshape(2,1)
-        model.b2.value = model.b2.value - 0.01 * model.b2.grad.reshape(1,1)
-        print("epoch{}: loss:{}".format(epoch, loss))
-        loss.clear()
-
-    now = time.time()
-    print("run time:{}s".format(now-past))
+    pass

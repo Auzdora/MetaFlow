@@ -7,7 +7,7 @@
 
     Created by Melrose-Lbt 2022-2-28
 """
-from _Tensor_core import Tensor
+from ._Tensor_core import Tensor
 import numpy as np
 
 

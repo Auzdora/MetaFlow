@@ -15,7 +15,7 @@
 import numpy as np
 import abc
 from numpy import ndarray
-from _Constants import OP_LIST
+from ._Constants import OP_LIST
 
 
 class Tensor:
