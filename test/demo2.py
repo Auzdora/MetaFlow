@@ -45,12 +45,10 @@ np.random.shuffle(train_set)
 
 class Model(Modules):
     def __init__(self):
-
         self.layer1 = Linear(in_features=3, out_features=3)
         self.layer2 = Linear(in_features=3, out_features=2)
         self.layer3 = Linear(in_features=2, out_features=1)
         super(Model, self).__init__()
-
 
     def forward(self, x):
         x = self.layer1(x)
@@ -70,7 +68,6 @@ for epoch in range(100):
         x = Tensor(np.array(train_set[i, :-1]).T)
         labels = np.expand_dims(np.array(train_set[i, -1]), axis=0)
         output = model(x)
-        time2 = time.time()
         loss = LossMSE(labels, output)
         loss.backward()
         # Update gradients
