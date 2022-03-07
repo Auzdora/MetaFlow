@@ -41,6 +41,11 @@ class SGD(Optimizer):
     """
         Stochastic Gradient Descent.
     """
+    def __init__(self, model, learning_rate):
+        super(SGD, self).__init__(model)
+        if learning_rate < 0.0:
+            raise ValueError("Learning rate value should be positive value.")
+
     def update(self):
         for params in self.model.parameters():
             params[1].value = params[1].value - self.learning_rate * params[1].grad.reshape(params[1].shape)
