@@ -30,3 +30,8 @@ class Linear(Modules):
 
     def forward(self, x):
         return F.fully_connected_layer(x, self.weight, self.bias)
+
+    def get_module_info(self):
+        print('In features dim: {}       Out features dim: {}'.format(self.in_features, self.out_features))
+        print("Weight:\n{}".format(self.weight.value))
+        print("Bias:\n{}".format(self.bias.value))

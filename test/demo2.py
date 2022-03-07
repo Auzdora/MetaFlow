@@ -59,7 +59,8 @@ class Model(Modules):
 
 past = time.time()
 model = Model()
-model.parameters()
+
+model.get_model_info()
 optimizer = SGD(model, learning_rate=0.01)
 # Start to train
 for epoch in range(100):

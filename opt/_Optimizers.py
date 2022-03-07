@@ -8,6 +8,7 @@
     Created by Melrose-Lbt 2022-3-5
 """
 import abc
+from core import Modules
 
 
 class Optimizer(abc.ABC):
@@ -15,6 +16,10 @@ class Optimizer(abc.ABC):
         Abstract class for optimizers.
     """
     def __init__(self, model, learning_rate=0.001):
+        if learning_rate < 0.0:
+            raise ValueError("learning rate value should be positive value.")
+        assert isinstance(model, Modules),\
+            "input model is not a Modules class."
         # Access to all the leaf nodes that are gradable.
         # Number of gradable leaf nodes.
         self.model = model
@@ -26,7 +31,7 @@ class Optimizer(abc.ABC):
             Params update method, need to be implemented when you create a
         sub class. Gradient descent is baseline.
         """
-        raise NotImplementedError("Optimizer update method undefined, you have to write it.")
+        raise NotImplementedError("optimizer update method undefined, you have to write it.")
 
 
 class BGD(Optimizer):
@@ -41,10 +46,6 @@ class SGD(Optimizer):
     """
         Stochastic Gradient Descent.
     """
-    def __init__(self, model, learning_rate):
-        super(SGD, self).__init__(model)
-        if learning_rate < 0.0:
-            raise ValueError("Learning rate value should be positive value.")
 
     def update(self):
         for params in self.model.parameters():

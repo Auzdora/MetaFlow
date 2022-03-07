@@ -63,11 +63,44 @@ class Modules:
         else:
             self.__dict__[key] = value
 
-    def get_names_tensors(self):
+    def layers_filter(self):
+        """
+            A generator.
+            Get models layer's name and its value. Get rid of those objects who are not
+        belong to Modules. Only if self.core_modules is False that this function could
+        be called.
+        """
         for name in self.__dict__:
-            yield name, self.__dict__[name]
+            if isinstance(self.__dict__[name], Modules):
+                yield name, self.__dict__[name]
+            else:
+                continue
+
+    def get_model_info(self):
+        if self.core_module:
+            raise AttributeError("this module is core module, you could only use this method when your model is "
+                                 "defined by yourself.")
+        for name, layers in self.layers_filter():
+            print('-' * 50)
+            print(">>> Layer name:{} ".format(name))
+            print('')
+            layers.get_module_info()
+            print('-' * 50)
+
+    @abc.abstractmethod
+    def get_module_info(self):
+        """
+            For developers,You have to rewrite this method when you create a new module.
+            This method is layer-wise information, it could be called by 'get_model_info'
+        method.
+        """
 
     def get_parameters(self):
+        """
+            A generator.
+            Get key word from 'self._parameters: OrderedDict()', and return its
+        key word and value.
+        """
         for items in self._parameters:
             yield items, self._parameters[items]
 
