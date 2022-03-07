@@ -57,6 +57,9 @@ class Modules:
                                     continue
                             else:
                                 continue
+
+                if len(self._parameters) == 0:
+                    raise AttributeError("cannot assign parameters after Modules.__init__() call")
         else:
             self.__dict__[key] = value
 
