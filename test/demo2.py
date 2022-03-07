@@ -62,25 +62,20 @@ model = Model()
 model.parameters()
 optimizer = SGD(model, learning_rate=0.01)
 # Start to train
-for epoch in range(100):
+for epoch in range(10):
     mean_loss = 0
     for i in range(len(train_set)):
         x = Tensor(np.array(train_set[i, :-1]).T)
         labels = np.expand_dims(np.array(train_set[i, -1]), axis=0)
         output = model(x)
+        time2 = time.time()
         loss = LossMSE(labels, output)
         loss.backward()
         # Update gradients
         optimizer.update()
-
-        # model.w1.value = model.w1.value - 0.01 * model.w1.grad.reshape(3, 3)
-        # model.w2.value = model.w2.value - 0.01 * model.w2.grad.reshape(2, 3)
-        # model.w3.value = model.w3.value - 0.01 * model.w3.grad.reshape(1, 2)
-        # model.b1.value = model.b1.value - 0.01 * model.b1.grad.reshape(3, 1)
-        # model.b2.value = model.b2.value - 0.01 * model.b2.grad.reshape(2, 1)
-        # model.b3.value = model.b3.value - 0.01 * model.b3.grad.reshape(1, 1)
         mean_loss += loss.value
         loss.clear()
+
     print("epoch{}: loss:{}".format(epoch, mean_loss / len(train_set)))
 
 now = time.time()

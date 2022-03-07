@@ -33,24 +33,31 @@ class Modules:
         return self.forward(x)
 
     def __setattr__(self, key, value):
+        """
+            Record model's trainable parameters into self._parameters: -> dict
+        """
         if isinstance(value, OrderedDict):
             if self.core_module:
                 pass
             else:
                 self.__dict__[key] = value
-                # If this Tensor is grad required
+                # counter makes sure that self._parameters record different value
                 module_layer_cnt = 0
                 for layers in self.__dict__:
                     module_layer_cnt += 1
+
                     if isinstance(self.__dict__[layers], bool):
-                        pass
+                        continue
                     else:
                         layers_dict = self.__dict__[layers].__dict__
                         for params_name in layers_dict:
                             if isinstance(layers_dict[params_name], Tensor):
                                 if layers_dict[params_name].grad_require:
-                                    self._parameters[params_name+str(module_layer_cnt)] = layers_dict[params_name]
-
+                                    self._parameters[params_name + str(module_layer_cnt)] = layers_dict[params_name]
+                                else:
+                                    continue
+                            else:
+                                continue
         else:
             self.__dict__[key] = value
 
