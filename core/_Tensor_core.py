@@ -15,7 +15,7 @@
 import numpy as np
 import abc
 from numpy import ndarray
-from ._Constants import OP_LIST
+from ._Constants import OP_LIST, MODULE_LIST
 
 
 class Tensor:
@@ -34,6 +34,9 @@ class Tensor:
 
     def __str__(self):
         return "Tensor({}, shape={}, dtype=Tensor.float)".format(self.value, self.shape)
+
+    def __call__(self, input_data):
+        pass
 
     def value_config(self, *args):
         """
@@ -71,6 +74,9 @@ class Tensor:
                 return np.expand_dims(self.compute_value(*args), axis=0)
             else:
                 return self.compute_value(*args)
+
+        # elif self.grad_fn in MODULE_LIST:
+        #     return self.compute_value(*args)
 
     def clear(self):
         """

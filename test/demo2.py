@@ -2,15 +2,18 @@
     Copyright © 2022 Melrose-Lbt
     All rights reserved
 
-    Filename: demo1.py
+    Filename: demo2.py
     Description: This file provides a demo for MetaFlow.
 
     Created by Melrose-Lbt 2022-3-6
 """
 import time
-from core import Modules, Tensor, Add, MatMul
-from loss_fn import LossMSE
+
 import numpy as np
+from core import Modules, Tensor
+from layers import Linear
+from loss_fn import LossMSE
+from opt import SGD
 
 # Prepare data
 male_heights = np.random.normal(171, 6, 500)
@@ -40,31 +43,24 @@ train_set = np.array([prepro(height, height), prepro(weight, weight), prepro(bfr
 np.random.shuffle(train_set)
 
 
-# Create a model
 class Model(Modules):
     def __init__(self):
+        self.layer1 = Linear(in_features=3, out_features=3)
+        self.layer2 = Linear(in_features=3, out_features=2)
+        self.layer3 = Linear(in_features=2, out_features=1)
         super(Model, self).__init__()
-        self.w1 = Tensor.random((3, 3), grad_require=True)
-        self.b1 = Tensor((3, 1), grad_require=True)
-        self.w2 = Tensor((2, 3), grad_require=True)
-        self.b2 = Tensor((2, 1), grad_require=True)
-        self.w3 = Tensor((1, 2), grad_require=True)
-        self.b3 = Tensor((1, 1), grad_require=True)
 
-    def forward(self, i):
-        i = MatMul(self.w1, i)
-        i = Add(i, self.b1)
-        i = MatMul(self.w2, i)
-        i = Add(i, self.b2)
-        i = MatMul(self.w3, i)
-        i = Add(self.b3, i)
-        return i
+    def forward(self, x):
+        x = self.layer1(x)
+        x = self.layer2(x)
+        x = self.layer3(x)
+        return x
 
 
 past = time.time()
 model = Model()
-for params in model.parameters():
-    print(params)
+model.parameters()
+optimizer = SGD(model, learning_rate=0.01)
 # Start to train
 for epoch in range(100):
     mean_loss = 0
@@ -75,12 +71,14 @@ for epoch in range(100):
         loss = LossMSE(labels, output)
         loss.backward()
         # Update gradients
-        model.w1.value = model.w1.value - 0.01 * model.w1.grad.reshape(3, 3)
-        model.w2.value = model.w2.value - 0.01 * model.w2.grad.reshape(2, 3)
-        model.w3.value = model.w3.value - 0.01 * model.w3.grad.reshape(1, 2)
-        model.b1.value = model.b1.value - 0.01 * model.b1.grad.reshape(3, 1)
-        model.b2.value = model.b2.value - 0.01 * model.b2.grad.reshape(2, 1)
-        model.b3.value = model.b3.value - 0.01 * model.b3.grad.reshape(1, 1)
+        optimizer.update()
+
+        # model.w1.value = model.w1.value - 0.01 * model.w1.grad.reshape(3, 3)
+        # model.w2.value = model.w2.value - 0.01 * model.w2.grad.reshape(2, 3)
+        # model.w3.value = model.w3.value - 0.01 * model.w3.grad.reshape(1, 2)
+        # model.b1.value = model.b1.value - 0.01 * model.b1.grad.reshape(3, 1)
+        # model.b2.value = model.b2.value - 0.01 * model.b2.grad.reshape(2, 1)
+        # model.b3.value = model.b3.value - 0.01 * model.b3.grad.reshape(1, 1)
         mean_loss += loss.value
         loss.clear()
     print("epoch{}: loss:{}".format(epoch, mean_loss / len(train_set)))

@@ -14,10 +14,10 @@ class Optimizer(abc.ABC):
     """
         Abstract class for optimizers.
     """
-    def __init__(self, learning_rate=0.01):
+    def __init__(self, model, learning_rate=0.001):
         # Access to all the leaf nodes that are gradable.
         # Number of gradable leaf nodes.
-        self.leaf_num = None
+        self.model = model
         self.learning_rate = learning_rate
 
     @abc.abstractmethod
@@ -42,7 +42,8 @@ class SGD(Optimizer):
         Stochastic Gradient Descent.
     """
     def update(self):
-        pass
+        for params in self.model.parameters():
+            params[1].value = params[1].value - self.learning_rate * params[1].grad.reshape(params[1].shape)
 
 
 class MiniBGD(Optimizer):
