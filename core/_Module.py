@@ -15,13 +15,13 @@ from ._Tensor_core import Tensor
 class Modules:
 
     def __init__(self, core_module=False):
-        # If core_module is True, that means this class is a layers module defined by developers
-        # If core_module is False, that means this class is a user defined model
+        """
+            If core_module is True, that means this class is a layers module defined by developers
+            If core_module is False, that means this class is a user defined model
+        """
         self.core_module = core_module
+        # Get model's parameters
         self._parameters = OrderedDict()
-        """
-            Accept key-word data structure from its child class.
-        """
 
     def __call__(self, x):
         """
@@ -29,7 +29,6 @@ class Modules:
         :param x: Tensor input
         :return: self.forward(x)
         """
-        self._parameters = OrderedDict()
         return self.forward(x)
 
     def __setattr__(self, key, value):
