@@ -63,7 +63,7 @@ model = Model()
 model.get_model_info()
 optimizer = SGD(model, learning_rate=0.01)
 # Start to train
-for epoch in range(100):
+for epoch in range(1):
     mean_loss = 0
     for i in range(len(train_set)):
         x = Tensor(np.array(train_set[i, :-1]).T)
@@ -84,3 +84,5 @@ print("run time:{}s".format(now - past))
 # TODO: Add predict method for model, train model, test model.
 print(model(Tensor([prepro(158, height), prepro(47, weight), prepro(22, bfrs)])))
 print(model(Tensor([prepro(178, height), prepro(90, weight), prepro(15, bfrs)])))
+dot_set = np.array([[0,0],[2,1],[1,1],[4,4],[5,5]])
+print(dot_set.shape)

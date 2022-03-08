@@ -1,1 +1,3 @@
-from .matrix_op import renew_to_diag
+from .matrix_op import *
+from .distance import *
+from .cluster import *

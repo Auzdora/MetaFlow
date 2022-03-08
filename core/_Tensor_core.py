@@ -69,6 +69,9 @@ class Tensor:
             elif isinstance(args[0], tuple):
                 return np.random.random(args[0])
 
+            elif isinstance(args[0], int) or isinstance(args[0], float):
+                return np.expand_dims(np.array(args[0]), axis=0)
+
         elif self.grad_fn in OP_LIST:
             if self.special_op:
                 return np.expand_dims(self.compute_value(*args), axis=0)
