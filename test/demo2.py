@@ -84,5 +84,3 @@ print("run time:{}s".format(now - past))
 # TODO: Add predict method for model, train model, test model.
 print(model(Tensor([prepro(158, height), prepro(47, weight), prepro(22, bfrs)])))
 print(model(Tensor([prepro(178, height), prepro(90, weight), prepro(15, bfrs)])))
-dot_set = np.array([[0,0],[2,1],[1,1],[4,4],[5,5]])
-print(dot_set.shape)
