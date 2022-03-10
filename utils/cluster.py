@@ -10,7 +10,7 @@
 import random
 import numpy as np
 import copy
-from utils import euclidean_distance
+from utils import euclidean_distance, find_min_dis
 from core import Tensor
 
 
@@ -134,7 +134,93 @@ class Kmeans:
         print(self.dot_set)
 
 
+class HierarchicalClustering:
+    """
+        Hierarchical clustering algorithm.
+    """
+    def __init__(self, dataset, threshold, method='min'):
+        """
+
+        :param dataset: dataset
+        :param threshold: if you choose k, it'll stop at kth cluster
+        :param method: 'min': single linkage
+                       'max': complete linkage
+                       'average': average linkage
+        """
+        self.dataset = np.array(dataset)
+        self.threshold = threshold
+        self.method = method
+        self.data_num = np.array(dataset).shape[0]
+        self.dot_set = [[] for i in range(self.data_num)]
+
+    def init_dot_set(self):
+        for i, cluster in enumerate(self.dot_set):
+            cluster.append(list(self.dataset[i]))
+
+    def single_linkage(self):
+        self.init_dot_set()
+        dis_matrix = np.zeros((self.data_num, self.data_num))
+        for index in range(self.data_num):
+            for sub_index in range(index, self.data_num):
+                dis_matrix[index][sub_index] = find_min_dis(self.dot_set[index], self.dot_set[sub_index])
+        # dis_matrix += dis_matrix.T - np.diag(dis_matrix.diagonal())
+
+        row_index, col_index = np.where(dis_matrix == np.min(dis_matrix[np.nonzero(dis_matrix)]))
+        print(dis_matrix)
+        print(np.nonzero(dis_matrix))
+        print(row_index, col_index)
+
+        while len(self.dot_set) > self.threshold:
+            row_index, col_index = np.where(dis_matrix == np.min(dis_matrix[np.nonzero(dis_matrix)]))
+
+            if row_index.shape[0] == 1:
+                self.dot_set[row_index[0]] = self.dot_set[row_index[0]] + self.dot_set[col_index[0]]
+                self.dot_set.remove(self.dot_set[col_index[0]])
+            elif row_index.shape[0] > 1:
+                concat_index = np.unique(np.array(list(row_index) + list(col_index)))
+                del_list = []
+                # register del list
+                for index in concat_index:
+                    del_list.append(self.dot_set[index])
+
+                for items in concat_index:
+                    if items == concat_index[0]:
+                        continue
+                    self.dot_set[concat_index[0]] += self.dot_set[concat_index[items]]
+
+                for i in range(len(del_list)):
+                    if i == 0:
+                        continue
+                    self.dot_set.remove(del_list[i])
+
+            # renew distance matrix
+            dis_matrix = np.zeros((len(self.dot_set), len(self.dot_set)))
+            for index in range(len(self.dot_set)):
+                for sub_index in range(index, len(self.dot_set)):
+                    dis_matrix[index][sub_index] = find_min_dis(self.dot_set[index], self.dot_set[sub_index])
+
+
+        print(self.dot_set)
+
+    def complete_linkage(self):
+        pass
+
+    def average_linkage(self):
+        pass
+
+    def train(self):
+        """
+            train logic
+        """
+        if self.method == 'min':
+            self.single_linkage()
+        elif self.method == 'max':
+            self.complete_linkage()
+        elif self.method == 'average':
+            self.average_linkage()
+
+
 if __name__ == "__main__":
-    data_set = [[0,0],[0,1],[1,1],[4,4],[5,5]]
-    kmeans = Kmeans(data_set, 5)
-    kmeans.train()
+    data_set = [[0,0, 0],[0,1, 1],[1,1, 1],[4,4, 6],[5,5, 2]]
+    cluster = HierarchicalClustering(data_set, 1, 'min')
+    cluster.train()
