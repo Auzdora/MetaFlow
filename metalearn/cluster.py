@@ -12,7 +12,6 @@ import numpy as np
 import copy
 
 from scipy.cluster.hierarchy import dendrogram, linkage
-
 from utils import euclidean_distance, find_min_dis
 from core import Tensor
 import matplotlib.pyplot as plt
@@ -142,7 +141,7 @@ class HierarchicalClustering:
     """
         Hierarchical clustering algorithm.
     """
-    def __init__(self, dataset, threshold, method='min'):
+    def __init__(self, dataset, threshold=1, method='min'):
         """
 
         :param dataset: dataset
@@ -156,63 +155,72 @@ class HierarchicalClustering:
         self.method = method
         self.data_num = np.array(dataset).shape[0]
         self.dot_set = [[] for i in range(self.data_num)]
-        self.history_min_val = []
-        self.history_concat = []
+        self.cluster_id = [i for i in range(len(dataset))]
         self.info_matrix = []
 
     def init_dot_set(self):
+        """
+            Set every data point to a single cluster. Bottom up method.
+        """
         for i, cluster in enumerate(self.dot_set):
             cluster.append(list(self.dataset[i]))
 
     def single_linkage(self):
+        """
+            Single linkage method. It automatically computes distance matrix for every
+        iteration. Then it'll find minimum data location and merge clusters which dis-
+        tance is the minimum over all clusters.
+            It'll also register its merging process into info matrix. This info matrix
+        will use 'dendrogram' method to draw a picture of merging process.
+        """
         self.init_dot_set()
-        dis_matrix = np.zeros((self.data_num, self.data_num))
-        for index in range(self.data_num):
-            for sub_index in range(index, self.data_num):
-                dis_matrix[index][sub_index] = find_min_dis(self.dot_set[index], self.dot_set[sub_index])
-        # dis_matrix += dis_matrix.T - np.diag(dis_matrix.diagonal())
-        print(dis_matrix)
-
+        cluster_id_cnt = self.cluster_id[-1]
         while len(self.dot_set) > self.threshold:
-            # minimum dot in distance matrix
-            row_index, col_index = np.where(dis_matrix == np.min(dis_matrix[np.nonzero(dis_matrix)]))
-
-            if row_index.shape[0] == 1:
-                self.history_min_val.append(dis_matrix[row_index[0]][col_index[0]])
-                self.dot_set[row_index[0]] = self.dot_set[row_index[0]] + self.dot_set[col_index[0]]
-                self.dot_set.remove(self.dot_set[col_index[0]])
-
-            elif row_index.shape[0] > 1:
-                concat_index = np.unique(np.array(list(row_index) + list(col_index)))
-                del_list = []
-                # register del list
-                for index in concat_index:
-                    del_list.append(self.dot_set[index])
-
-                for items in concat_index:
-                    if items == concat_index[0]:
-                        continue
-                    self.dot_set[concat_index[0]] += self.dot_set[concat_index[items]]
-                    self.history_min_val.append(dis_matrix[row_index[0]][col_index[0]])
-
-                for i in range(len(del_list)):
-                    if i == 0:
-                        continue
-                    self.dot_set.remove(del_list[i])
-
             # renew distance matrix
             dis_matrix = np.zeros((len(self.dot_set), len(self.dot_set)))
             for index in range(len(self.dot_set)):
                 for sub_index in range(index, len(self.dot_set)):
                     dis_matrix[index][sub_index] = find_min_dis(self.dot_set[index], self.dot_set[sub_index])
+
+            # minimum dot in distance matrix
+            row_index, col_index = np.where(dis_matrix == np.min(dis_matrix[np.nonzero(dis_matrix)]))
+            concat_index = np.unique(np.array(list(row_index) + list(col_index)))
+            min_dis = np.min(dis_matrix[np.nonzero(dis_matrix)])
+
+            del_list = []
+            del_id_list = []
+            for i in concat_index:
+                del_list.append(list(self.dot_set[i]))
+                del_id_list.append(i)
+            for i in range(concat_index.shape[0]):
+                info = []
+                if i == 0:
+                    continue
+                info.append(self.cluster_id[concat_index[0]])
+                info.append(self.cluster_id[concat_index[i]])
+                info.append(min_dis)
+                self.dot_set[concat_index[0]] += self.dot_set[concat_index[i]]
+                self.cluster_id[concat_index[0]] = cluster_id_cnt + 1
+                info.append(self.cluster_id[concat_index[0]])
+                self.info_matrix.append(info)
+
+                cluster_id_cnt += 1
+
+            for i in range(concat_index.shape[0]):
+                if i == 0:
+                    continue
+                self.dot_set.remove(del_list[i])
+
+            for i in range(concat_index.shape[0]-1, -1, -1):
+                if i == 0:
+                    continue
+                self.cluster_id.pop(del_id_list[i])
+
+            print(self.info_matrix)
+            print(self.cluster_id)
             print(dis_matrix)
             print(self.dot_set)
 
-
-
-        print(self.history_min_val)
-
-
     def complete_linkage(self):
         pass
 
@@ -221,63 +229,59 @@ class HierarchicalClustering:
 
     def train(self):
         """
-            train logic
+            Train logic.
+            Hierarchical clustering has three different types. Although they are
+        different, the model underneath the algorithm is actually same. What dif-
+        ferentiate them is the way to compute distance between two clusters.
+            Train method actually acts as a scheduler. It takes 'self.method' in,
+        figures out which way user want to go and call that function accordingly.
+        It provides 3 methods.
+
+            'simple': This means when it comes to compute distance between two
+        clusters, algorithm will compute minimum distance between them. Based on
+        this value, than it will combine these two clusters into single one.
+
+            'complete': This means when it comes to compute distance between two
+        clusters, algorithm will compute maximum distance between them.
+
+            'average': This means when it comes to compute distance between two
+        clusters, algorithm will compute maximum distance between them.
         """
-        if self.method == 'min':
+        if self.method == 'single':
             self.single_linkage()
-        elif self.method == 'max':
+        elif self.method == 'complete':
             self.complete_linkage()
         elif self.method == 'average':
             self.average_linkage()
 
-    def define_relationship(self, dot_set):
+    def register(self, min_dis, cluster_id):
         pass
-
 
     def show_img(self):
         """
-            Show images when clustering.
+            Show images when clustering. Use 'scipy.cluster.hierarchy' package.
+        dendrogram method. This method needs formed information matrix as input.
+
+        Information matrix:
+            A row:
+                A row in information matrix represents for one iteration. The
+            number of rows in information matrix are random. It depends on how
+            many iterations it'll need to merge into single cluster,
+
+            A column:
+                A column has to have four types of information.
+                1. id of original cluster a
+                2. id of original cluster b
+                3. distance between a and b
+                4. id of new cluster combined by a and b
+
         """
-        dn = dendrogram(self.coding_matrix)
+        dn = dendrogram(np.array(self.info_matrix))
         plt.show()
 
 
-class HierarchicalClustering1:
-    def __init__(self, dataset, method='min'):
-        self.dataset = self.dataset_init(dataset)
-        self.len_dataset = len(self.dataset)
-        self.method = method
-        self.cluster_set = [[] for i in range(self.len_dataset)]
-
-    def dataset_init(self, dataset):
-        tensor_set = []
-        for items in dataset:
-            tensor_set.append(Tensor(items))
-        print(tensor_set)
-        return tensor_set
-
-    def single_linkage(self):
-        pass
-
-    def complete_linkage(self):
-        pass
-
-    def average_linkage(self):
-        pass
-
-    def train(self):
-        """
-            train logic
-        """
-        if self.method == 'min':
-            self.single_linkage()
-        elif self.method == 'max':
-            self.complete_linkage()
-        elif self.method == 'average':
-            self.average_linkage()
-
-
 if __name__ == "__main__":
-    data_set = [[0, 0], [0, 1], [1, 1], [4, 4], [5, 5]]
-    cluster = HierarchicalClustering1(data_set, 'min')
+    data_set = [[0, 0], [0, 1], [2, 1], [4, 4], [5, 5]]
+    cluster = HierarchicalClustering(data_set, method='single')
     cluster.train()
+    cluster.show_img()

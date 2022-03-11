@@ -132,21 +132,5 @@ class MatMul(Operator):
             return jacobi[row_order, :][:, col_order]
 
 
-class Merge(Operator):
-    """
-        A operator for merging two tensors into one cluster. This is for
-    cluster algorithm (utils file).
-    """
-    def __init__(self, *args, id_num=None, cluster_distance=None):
-        self.id_num = id_num
-        self.cluster_distance = cluster_distance
-        super(Merge, self).__init__(*args, grad_fn='<TensorMerge>')
-
-    def compute_value(self, *args):
-        pass
-
-    def compute_jacobi(self, *args):
-        pass
-
 if __name__ == "__main__":
     pass
