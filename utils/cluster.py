@@ -10,8 +10,12 @@
 import random
 import numpy as np
 import copy
+
+from scipy.cluster.hierarchy import dendrogram, linkage
+
 from utils import euclidean_distance, find_min_dis
 from core import Tensor
+import matplotlib.pyplot as plt
 
 
 class Kmeans:
@@ -152,6 +156,9 @@ class HierarchicalClustering:
         self.method = method
         self.data_num = np.array(dataset).shape[0]
         self.dot_set = [[] for i in range(self.data_num)]
+        self.history_min_val = []
+        self.history_concat = []
+        self.info_matrix = []
 
     def init_dot_set(self):
         for i, cluster in enumerate(self.dot_set):
@@ -164,18 +171,17 @@ class HierarchicalClustering:
             for sub_index in range(index, self.data_num):
                 dis_matrix[index][sub_index] = find_min_dis(self.dot_set[index], self.dot_set[sub_index])
         # dis_matrix += dis_matrix.T - np.diag(dis_matrix.diagonal())
-
-        row_index, col_index = np.where(dis_matrix == np.min(dis_matrix[np.nonzero(dis_matrix)]))
         print(dis_matrix)
-        print(np.nonzero(dis_matrix))
-        print(row_index, col_index)
 
         while len(self.dot_set) > self.threshold:
+            # minimum dot in distance matrix
             row_index, col_index = np.where(dis_matrix == np.min(dis_matrix[np.nonzero(dis_matrix)]))
 
             if row_index.shape[0] == 1:
+                self.history_min_val.append(dis_matrix[row_index[0]][col_index[0]])
                 self.dot_set[row_index[0]] = self.dot_set[row_index[0]] + self.dot_set[col_index[0]]
                 self.dot_set.remove(self.dot_set[col_index[0]])
+
             elif row_index.shape[0] > 1:
                 concat_index = np.unique(np.array(list(row_index) + list(col_index)))
                 del_list = []
@@ -187,6 +193,7 @@ class HierarchicalClustering:
                     if items == concat_index[0]:
                         continue
                     self.dot_set[concat_index[0]] += self.dot_set[concat_index[items]]
+                    self.history_min_val.append(dis_matrix[row_index[0]][col_index[0]])
 
                 for i in range(len(del_list)):
                     if i == 0:
@@ -198,9 +205,59 @@ class HierarchicalClustering:
             for index in range(len(self.dot_set)):
                 for sub_index in range(index, len(self.dot_set)):
                     dis_matrix[index][sub_index] = find_min_dis(self.dot_set[index], self.dot_set[sub_index])
+            print(dis_matrix)
+            print(self.dot_set)
 
 
-        print(self.dot_set)
+
+        print(self.history_min_val)
+
+
+    def complete_linkage(self):
+        pass
+
+    def average_linkage(self):
+        pass
+
+    def train(self):
+        """
+            train logic
+        """
+        if self.method == 'min':
+            self.single_linkage()
+        elif self.method == 'max':
+            self.complete_linkage()
+        elif self.method == 'average':
+            self.average_linkage()
+
+    def define_relationship(self, dot_set):
+        pass
+
+
+    def show_img(self):
+        """
+            Show images when clustering.
+        """
+        dn = dendrogram(self.coding_matrix)
+        plt.show()
+
+
+class HierarchicalClustering1:
+    def __init__(self, dataset, method='min'):
+        self.dataset = self.dataset_init(dataset)
+        self.len_dataset = len(self.dataset)
+        self.method = method
+        self.cluster_set = [[] for i in range(self.len_dataset)]
+
+    def dataset_init(self, dataset):
+        tensor_set = []
+        for items in dataset:
+            tensor_set.append(Tensor(items))
+        print(tensor_set)
+        return tensor_set
+
+    def single_linkage(self):
+        pass
 
     def complete_linkage(self):
         pass
@@ -221,6 +278,6 @@ class HierarchicalClustering:
 
 
 if __name__ == "__main__":
-    data_set = [[0,0, 0],[0,1, 1],[1,1, 1],[4,4, 6],[5,5, 2]]
-    cluster = HierarchicalClustering(data_set, 1, 'min')
+    data_set = [[0, 0], [0, 1], [1, 1], [4, 4], [5, 5]]
+    cluster = HierarchicalClustering1(data_set, 'min')
     cluster.train()

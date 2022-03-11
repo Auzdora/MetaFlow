@@ -162,7 +162,6 @@ class Tensor:
         for abstract method 'def compute_value(self, *args)' to call.
             :return: tensors value list
         """
-        self.grad_require = True
         tensors = []
         for tensor in args:
             tensor.children.append(self)

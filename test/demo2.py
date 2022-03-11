@@ -63,7 +63,7 @@ model = Model()
 model.get_model_info()
 optimizer = SGD(model, learning_rate=0.01)
 # Start to train
-for epoch in range(1):
+for epoch in range(100):
     mean_loss = 0
     for i in range(len(train_set)):
         x = Tensor(np.array(train_set[i, :-1]).T)

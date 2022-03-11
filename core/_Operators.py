@@ -46,7 +46,7 @@ class Add(Operator):
         Add operator.
     """
     def __init__(self, *args):
-        super(Add, self).__init__(*args, grad_fn='<TensorAdd>')
+        super(Add, self).__init__(*args, grad_fn='<TensorAdd>', grad_require=True)
 
     def compute_value(self, *args):
         # Define relationship
@@ -62,7 +62,7 @@ class Minus(Operator):
         Minus operator.
     """
     def __init__(self, *args):
-        super(Minus, self).__init__(*args, grad_fn='<TensorMinus>')
+        super(Minus, self).__init__(*args, grad_fn='<TensorMinus>', grad_require=True)
 
     def compute_value(self, *args):
         # Define relationship
@@ -79,7 +79,7 @@ class Mul(Operator):
         Mul operator.
     """
     def __init__(self, *args):
-        super(Mul, self).__init__(*args, grad_fn='<TensorMul>')
+        super(Mul, self).__init__(*args, grad_fn='<TensorMul>', grad_require=True)
 
     def compute_value(self, *args):
         # Define relationship
@@ -99,7 +99,7 @@ class MatMul(Operator):
             different ways to compute jacobi matrix with respect to the order of tensor.
     """
     def __init__(self, *args):
-        super(MatMul, self).__init__(*args, grad_fn='<TensorMatMul>')
+        super(MatMul, self).__init__(*args, grad_fn='<TensorMatMul>', grad_require=True)
 
     def compute_value(self, *args):
         # Define relationship
@@ -131,6 +131,22 @@ class MatMul(Operator):
                 T.reshape(parent_index_num)
             return jacobi[row_order, :][:, col_order]
 
+
+class Merge(Operator):
+    """
+        A operator for merging two tensors into one cluster. This is for
+    cluster algorithm (utils file).
+    """
+    def __init__(self, *args, id_num=None, cluster_distance=None):
+        self.id_num = id_num
+        self.cluster_distance = cluster_distance
+        super(Merge, self).__init__(*args, grad_fn='<TensorMerge>')
+
+    def compute_value(self, *args):
+        pass
+
+    def compute_jacobi(self, *args):
+        pass
 
 if __name__ == "__main__":
     pass
