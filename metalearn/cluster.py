@@ -45,7 +45,6 @@ class Kmeans:
         cluster_index = random.sample(range(0, len(data_set)), self.k)
         for i in range(self.k):
             cluster_center.append(self.dataset[cluster_index[i]])
-        print(cluster_center)
 
         return cluster_center
 
@@ -135,6 +134,24 @@ class Kmeans:
             self.compute_centers()
 
         print(self.dot_set)
+
+    def show_img(self):
+        color_set = ['blue', 'green', 'yellow', 'gold', 'green']
+        for index, clusters in enumerate(self.dot_set):
+            x_label, y_label = [], []
+            for items in clusters:
+                x_label.append(items[0])
+                y_label.append(items[1])
+            plt.scatter(x_label, y_label, marker='o', color=color_set[index])
+
+        center_x, center_y = [], []
+        for i in self.cluster_center:
+            center_x.append(i[0])
+            center_y.append(i[1])
+
+        plt.scatter(center_x, center_y, marker='x', color='red')
+        plt.legend()
+        plt.show()
 
 
 class HierarchicalClustering:
@@ -254,9 +271,6 @@ class HierarchicalClustering:
         elif self.method == 'average':
             self.average_linkage()
 
-    def register(self, min_dis, cluster_id):
-        pass
-
     def show_img(self):
         """
             Show images when clustering. Use 'scipy.cluster.hierarchy' package.
@@ -282,6 +296,7 @@ class HierarchicalClustering:
 
 if __name__ == "__main__":
     data_set = [[0, 0], [0, 1], [2, 1], [4, 4], [5, 5]]
-    cluster = HierarchicalClustering(data_set, method='single')
+    cluster = Kmeans(data_set, 3)
+    # cluster = HierarchicalClustering(data_set, method='single')
     cluster.train()
     cluster.show_img()
