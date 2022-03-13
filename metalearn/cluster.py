@@ -26,7 +26,9 @@ class Kmeans:
         self.k = k
         self.cluster_center = self.random_choose()
         self.dot_set = [[] for i in range(self.k)]
-        self.last_dot_set = [[] for i in range(self.k)]
+        self.last_cluster_center = []
+
+        # self.last_dot_set = [[] for i in range(self.k)]
 
     def init_cluster(self):
         """
@@ -53,31 +55,34 @@ class Kmeans:
             Judge center point is stable or not.
         :return: bool value
         """
-        null = 0
-        for i in range(self.k):
-            if len(self.last_dot_set[i]) == 0:
-                null += 1
-        if null == self.k:
-            return True
-
-        same_cnt = 0
-        for i in range(self.k):
-            ith_cluster = np.array(self.dot_set[i])
-            last_ith_cluster = np.array(self.last_dot_set[i])
-            # First check shape, because numpy needs same shape matrix to compare
-            if ith_cluster.shape == last_ith_cluster.shape:
-                # If they have same shape, then check their elements
-                if (ith_cluster == last_ith_cluster).all():
-                    same_cnt += 1
-                else:
-                    continue
-            else:
-                continue
-
-        if same_cnt == self.k:
+        if self.cluster_center == self.last_cluster_center:
             return False
-        else:
-            return True
+        return True
+        # null = 0
+        # for i in range(self.k):
+        #     if len(self.last_dot_set[i]) == 0:
+        #         null += 1
+        # if null == self.k:
+        #     return True
+        #
+        # same_cnt = 0
+        # for i in range(self.k):
+        #     ith_cluster = np.array(self.dot_set[i])
+        #     last_ith_cluster = np.array(self.last_dot_set[i])
+        #     # First check shape, because numpy needs same shape matrix to compare
+        #     if ith_cluster.shape == last_ith_cluster.shape:
+        #         # If they have same shape, then check their elements
+        #         if (ith_cluster == last_ith_cluster).all():
+        #             same_cnt += 1
+        #         else:
+        #             continue
+        #     else:
+        #         continue
+        #
+        # if same_cnt == self.k:
+        #     return False
+        # else:
+        #     return True
 
     def check_dot_exist(self, dot):
         """
@@ -113,7 +118,7 @@ class Kmeans:
         """
         self.cluster_center = []
         for cluster_index in range(self.k):
-            new_center = np.mean(np.array(self.dot_set[cluster_index]),axis=0)
+            new_center = np.mean(np.array(self.dot_set[cluster_index]), axis=0)
             self.cluster_center.append(list(new_center))
 
     def train(self):
@@ -124,7 +129,8 @@ class Kmeans:
         self.init_cluster()
 
         while self.center_stable():
-            self.last_dot_set = copy.deepcopy(self.dot_set)
+            self.last_cluster_center = self.cluster_center
+            # self.last_dot_set = copy.deepcopy(self.dot_set)
             for items in self.dataset:
                 dis_set = []
                 for i in range(self.k):
@@ -295,8 +301,8 @@ class HierarchicalClustering:
 
 
 if __name__ == "__main__":
-    data_set = [[0, 0], [0, 1], [2, 1], [4, 4], [5, 5]]
+    data_set = [[0, 0], [1, 0], [1, 1], [4, 4], [5, 4], [5, 5]]
     cluster = Kmeans(data_set, 3)
-    # cluster = HierarchicalClustering(data_set, method='single')
     cluster.train()
     cluster.show_img()
+    # cluster = HierarchicalClustering(data_set, method='single')
