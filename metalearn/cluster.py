@@ -188,6 +188,17 @@ class HierarchicalClustering:
         for i, cluster in enumerate(self.dot_set):
             cluster.append(list(self.dataset[i]))
 
+    def _info_register(self, row_index, col_index, min_dis):
+        """
+            Register information for 'show_img' method.
+        :param row_index: the row which contains minimum distance
+        :param col_index: the column which contains minimum distance
+        :param min_dis: minimum distance
+        """
+        info = [self.cluster_id[row_index[0]], self.cluster_id[col_index[0]], min_dis,
+                len(self.dot_set[row_index[0]]) + len(self.dot_set[col_index[0]])]
+        self.info_matrix.append(info)
+
     def single_linkage(self):
         """
             Single linkage method. It automatically computes distance matrix for every
@@ -207,42 +218,21 @@ class HierarchicalClustering:
 
             # minimum dot in distance matrix
             row_index, col_index = np.where(dis_matrix == np.min(dis_matrix[np.nonzero(dis_matrix)]))
-            concat_index = np.unique(np.array(list(row_index) + list(col_index)))
             min_dis = np.min(dis_matrix[np.nonzero(dis_matrix)])
 
-            del_list = []
-            del_id_list = []
-            for i in concat_index:
-                del_list.append(list(self.dot_set[i]))
-                del_id_list.append(i)
-            for i in range(concat_index.shape[0]):
-                info = []
-                if i == 0:
-                    continue
-                info.append(self.cluster_id[concat_index[0]])
-                info.append(self.cluster_id[concat_index[i]])
-                info.append(min_dis)
-                self.dot_set[concat_index[0]] += self.dot_set[concat_index[i]]
-                self.cluster_id[concat_index[0]] = cluster_id_cnt + 1
-                info.append(self.cluster_id[concat_index[0]])
-                self.info_matrix.append(info)
+            del_list = [list(self.dot_set[row_index[0]]), list(self.dot_set[col_index[0]])]
+            del_id_list = [row_index[0], col_index[0]]
+            # register information
+            self._info_register(row_index, col_index, min_dis)
+            self.dot_set[row_index[0]] += self.dot_set[col_index[0]]
 
-                cluster_id_cnt += 1
+            self.cluster_id[row_index[0]] = cluster_id_cnt + 1
+            cluster_id_cnt += 1
 
-            for i in range(concat_index.shape[0]):
-                if i == 0:
-                    continue
-                self.dot_set.remove(del_list[i])
+            self.dot_set.remove(del_list[-1])
+            self.cluster_id.pop(del_id_list[-1])
 
-            for i in range(concat_index.shape[0]-1, -1, -1):
-                if i == 0:
-                    continue
-                self.cluster_id.pop(del_id_list[i])
-
-            print(self.info_matrix)
-            print(self.cluster_id)
-            print(dis_matrix)
-            print(self.dot_set)
+        print(self.dot_set)
 
     def complete_linkage(self):
         pass
@@ -301,8 +291,12 @@ class HierarchicalClustering:
 
 
 if __name__ == "__main__":
-    data_set = [[0, 0], [1, 0], [1, 1], [4, 4], [5, 4], [5, 5]]
-    cluster = Kmeans(data_set, 3)
+    from sklearn.cluster import AgglomerativeClustering  # 导入sklearn的层次聚类函数
+    import pandas as pd
+
+    data = np.array([[0, 0], [0, 1], [2, 0], [3, 3], [4, 4]])
+    # cluster = Kmeans(data_set, 3)
+    cluster = HierarchicalClustering(data, method='single')
     cluster.train()
     cluster.show_img()
-    # cluster = HierarchicalClustering(data_set, method='single')
+
