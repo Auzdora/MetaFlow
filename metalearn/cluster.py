@@ -58,31 +58,6 @@ class Kmeans:
         if self.cluster_center == self.last_cluster_center:
             return False
         return True
-        # null = 0
-        # for i in range(self.k):
-        #     if len(self.last_dot_set[i]) == 0:
-        #         null += 1
-        # if null == self.k:
-        #     return True
-        #
-        # same_cnt = 0
-        # for i in range(self.k):
-        #     ith_cluster = np.array(self.dot_set[i])
-        #     last_ith_cluster = np.array(self.last_dot_set[i])
-        #     # First check shape, because numpy needs same shape matrix to compare
-        #     if ith_cluster.shape == last_ith_cluster.shape:
-        #         # If they have same shape, then check their elements
-        #         if (ith_cluster == last_ith_cluster).all():
-        #             same_cnt += 1
-        #         else:
-        #             continue
-        #     else:
-        #         continue
-        #
-        # if same_cnt == self.k:
-        #     return False
-        # else:
-        #     return True
 
     def check_dot_exist(self, dot):
         """
@@ -291,12 +266,8 @@ class HierarchicalClustering:
 
 
 if __name__ == "__main__":
-    from sklearn.cluster import AgglomerativeClustering  # 导入sklearn的层次聚类函数
-    import pandas as pd
-
     data = np.array([[0, 0], [0, 1], [2, 0], [3, 3], [4, 4]])
     # cluster = Kmeans(data_set, 3)
     cluster = HierarchicalClustering(data, method='single')
     cluster.train()
     cluster.show_img()
-
