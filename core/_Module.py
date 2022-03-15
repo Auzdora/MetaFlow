@@ -91,8 +91,12 @@ class Modules:
     def get_module_info(self):
         """
             For developers,You have to rewrite this method when you create a new module.
-            This method is layer-wise information, it could be called by 'get_model_info'
+            This method is layer-wise information (that means, you could only rewrite this
+            method when you define a new layer at layers directory, it could be called by 'get_model_info'
         method.
+
+            It could be used to show the model's parameters in defined way.
+            It has to return its parameters value for further function.
         """
 
     def get_parameters(self):

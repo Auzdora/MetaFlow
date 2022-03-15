@@ -32,6 +32,12 @@ class Linear(Modules):
         return F.fully_connected_layer(x, self.weight, self.bias)
 
     def get_module_info(self):
+        """
+            Have to rewrite when you define a brand new layers in 'layers'
+        directory.
+            It could be used to show the model's parameters in defined way.
+            It also has to return its parameters value for further function.
+        """
         print('In features dim: {}       Out features dim: {}'.format(self.in_features, self.out_features))
         print("Weight:\n{}".format(self.weight.value))
         print("Bias:\n{}".format(self.bias.value))
