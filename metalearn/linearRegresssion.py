@@ -34,7 +34,7 @@ class LinearRegression:
     """
         Linear regression model
     """
-    def __init__(self, dataset, opt='sgd', lr=0.01):
+    def __init__(self, dataset, opt='sgd', lr=0.01, normalization=False):
         """
         :param dataset:
         :param opt: you could choose 'SGD','BGD','MBGD' for this version.
@@ -47,11 +47,26 @@ class LinearRegression:
         self.data_num = self.dataset.shape[0]
         self.data_dim = self.dataset.shape[1]
 
+        if normalization:
+            self.mean_container, self.std_container = self._normalize()
+        else:
+            pass
+
         # model
         self.model = LinearModel(in_features=self.data_dim-1, out_features=1)
         if str.lower(opt) == 'sgd':
             self.optimizer = SGD(self.model, lr)
         super(LinearRegression, self).__init__()
+
+    def _normalize(self):
+        mean_container, std_container = [], []
+        for index in range(self.data_dim):
+            mean = np.mean(self.dataset[:, index])
+            std = np.std(self.dataset[:, index])
+            self.dataset[:, index] = (self.dataset[:, index]-mean)/std
+            mean_container.append(mean)
+            std_container.append(std)
+        return mean_container, std_container
 
     def get_model_info(self):
         self.model.get_model_info()
@@ -70,8 +85,17 @@ class LinearRegression:
                 loss.backward()
                 self.optimizer.update()
                 mean_loss += loss.value
+                if epoch == iteration_num-1 and i == self.data_num -1:
+                    continue
                 loss.clear()
             print("epoch{}: loss:{}".format(epoch, mean_loss / self.data_num))
+
+    def predict(self, data):
+        data = np.array(data)
+        output = []
+        for input in data:
+            output.append(float(self.model(input).value))
+        return output
 
     def plot_data(self):
         """

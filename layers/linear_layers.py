@@ -29,7 +29,11 @@ class Linear(Modules):
         super(Linear, self).__init__(self.core_module)
 
     def forward(self, x):
-        return F.fully_connected_layer(x, self.weight, self.bias)
+        if isinstance(x, Tensor):
+            return F.fully_connected_layer(x, self.weight, self.bias)
+        else:
+            x = Tensor(x)
+            return F.fully_connected_layer(x, self.weight, self.bias)
 
     def get_module_info(self):
         """
