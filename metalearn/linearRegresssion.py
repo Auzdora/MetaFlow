@@ -59,6 +59,11 @@ class LinearRegression:
         super(LinearRegression, self).__init__()
 
     def _normalize(self):
+        """
+            Normalize data.
+            Highly recommended if you are using gradient descent method to opt-
+        imize the model, because its result could be more accurate.
+        """
         mean_container, std_container = [], []
         for index in range(self.data_dim):
             mean = np.mean(self.dataset[:, index])
@@ -69,11 +74,14 @@ class LinearRegression:
         return mean_container, std_container
 
     def get_model_info(self):
+        """
+            Call this method then you could get this model's information
+        """
         self.model.get_model_info()
 
     def train(self, iteration_num):
         """
-            Train logic
+            Train logic, based on gradient descent method.
         """
         for epoch in range(iteration_num):
             mean_loss = 0
@@ -121,11 +129,4 @@ class LinearRegression:
             plt.show()
         else:
             raise ValueError("plot_data method doesn't support image show above 2 dim yet!")
-
-
-if __name__ == "__main__":
-    dataset = [[0, 0], [0, 1], [2, 0], [3, 3], [4, 4]]
-    linear = LinearRegression(dataset)
-    linear.get_model_info()
-    linear.train(100)
-    linear.show()
+        
