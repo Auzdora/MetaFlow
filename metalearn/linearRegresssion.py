@@ -46,8 +46,9 @@ class LinearRegression:
         # dataset params
         self.data_num = self.dataset.shape[0]
         self.data_dim = self.dataset.shape[1]
+        self.normalization = normalization
 
-        if normalization:
+        if self.normalization:
             self.mean_container, self.std_container = self._normalize()
         else:
             pass
@@ -100,9 +101,19 @@ class LinearRegression:
 
     def predict(self, data):
         data = np.array(data)
+        if self.normalization:
+            # duplicate mean and std matrix, -1 represents for labels
+            mean = np.tile(self.mean_container[:-1], (data.shape[0], 1))
+            std = np.tile(self.std_container[:-1], (data.shape[0], 1))
+            data = (data - mean)/std
         output = []
         for input in data:
             output.append(float(self.model(input).value))
+        if self.normalization:
+            out_mean = np.tile(self.mean_container[-1], (1, data.shape[0])).squeeze(0)
+            out_std = np.tile(self.std_container[-1], (1, data.shape[0])).squeeze(0)
+            output = np.array(output)
+            output = np.multiply(output, out_std) + out_mean
         return output
 
     def plot_data(self):
