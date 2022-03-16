@@ -129,4 +129,3 @@ class LinearRegression:
             plt.show()
         else:
             raise ValueError("plot_data method doesn't support image show above 2 dim yet!")
-        

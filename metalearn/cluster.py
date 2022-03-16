@@ -9,11 +9,8 @@
 """
 import random
 import numpy as np
-import copy
-
-from scipy.cluster.hierarchy import dendrogram, linkage
+from scipy.cluster.hierarchy import dendrogram
 from utils import euclidean_distance, find_min_dis
-from core import Tensor
 import matplotlib.pyplot as plt
 
 
@@ -22,7 +19,10 @@ class Kmeans:
         K-means algorithm.
     """
     def __init__(self, dataset, k):
-        self.dataset = dataset
+        if isinstance(dataset, list):
+            self.dataset = dataset
+        else:
+            raise ValueError("argument dataset has to be list data type!")
         self.k = k
         self.cluster_center = self.random_choose()
         self.dot_set = [[] for i in range(self.k)]
@@ -44,7 +44,7 @@ class Kmeans:
         :return:
         """
         cluster_center = []
-        cluster_index = random.sample(range(0, len(data_set)), self.k)
+        cluster_index = random.sample(range(0, len(self.dataset)), self.k)
         for i in range(self.k):
             cluster_center.append(self.dataset[cluster_index[i]])
 
@@ -266,8 +266,8 @@ class HierarchicalClustering:
 
 
 if __name__ == "__main__":
-    data = np.array([[0, 0], [0, 1], [2, 0], [3, 3], [4, 4]])
-    # cluster = Kmeans(data_set, 3)
-    cluster = HierarchicalClustering(data, method='single')
+    data = [[0, 0], [0, 1], [2, 0], [3, 3], [4, 4]]
+    cluster = Kmeans(data, 3)
+    #cluster = HierarchicalClustering(data, method='single')
     cluster.train()
     cluster.show_img()
