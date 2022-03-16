@@ -143,20 +143,36 @@ class LinearRegression:
 
 
 class NormalEquation:
+    """
+        Normal equation method to solve linear regression problem.
+    You could use this method when the scale of dataset is small.
+    But when you have amount of data to regress, it is better to use
+    LinearRegression (Gradient Descent) because normal equation needs
+    to take a lot of time and computation energy.
+    """
     def __init__(self, dataset):
         self.dataset = np.array(dataset)
         one = np.ones(dataset.shape[0])
+        # build X matrix
         self.X = np.column_stack((dataset[:, :-1], one))
-        print(self.X)
+        # build Y matrix
         self.Y = dataset[:, -1]
         self.theta = self._compute()
 
     def _compute(self):
+        """
+            Optimize solution: theta = (X^T * X)^(-1) * X^T * Y
+        :return: theta parameters
+        """
         params = np.matmul(np.matmul(np.linalg.inv(np.matmul(self.X.T, self.X)), self.X.T), self.Y)
-        print("papapapa:{}".format(params))
         return params
 
     def predict(self, data):
+        """
+            Predict method
+        :param data: list or numpy data
+        :return:
+        """
         data = np.array(data)
         one = np.ones((data.shape[0]))
         data = np.column_stack((data, one))
