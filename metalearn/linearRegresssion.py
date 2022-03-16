@@ -140,3 +140,25 @@ class LinearRegression:
             plt.show()
         else:
             raise ValueError("plot_data method doesn't support image show above 2 dim yet!")
+
+
+class NormalEquation:
+    def __init__(self, dataset):
+        self.dataset = np.array(dataset)
+        one = np.ones(dataset.shape[0])
+        self.X = np.column_stack((dataset[:, :-1], one))
+        print(self.X)
+        self.Y = dataset[:, -1]
+        self.theta = self._compute()
+
+    def _compute(self):
+        params = np.matmul(np.matmul(np.linalg.inv(np.matmul(self.X.T, self.X)), self.X.T), self.Y)
+        print("papapapa:{}".format(params))
+        return params
+
+    def predict(self, data):
+        data = np.array(data)
+        one = np.ones((data.shape[0]))
+        data = np.column_stack((data, one))
+        output = np.sum(self.theta * data, axis=1)
+        return output

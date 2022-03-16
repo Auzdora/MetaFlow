@@ -1,5 +1,5 @@
 import numpy as np
-from metalearn import LinearRegression
+from metalearn import LinearRegression, NormalEquation
 from sklearn import linear_model
 import matplotlib.pyplot as plt
 models = linear_model.LinearRegression()
@@ -22,9 +22,16 @@ def data_loader(path):
 
 
 dataset = data_loader(data_path)
-x = [[2104, 3], [4478, 5], [852, 2]]
-model = LinearRegression(dataset, normalization=True)
-model.train(100)
+# normal equation
+equation = NormalEquation(dataset)
+# linear regression
+model = LinearRegression(dataset, lr=0.00003, normalization=True)
+model.train(13000)
 model.get_model_info()
+
+# predict
+x = [[2104, 3], [4478, 5], [852, 2]]
+ys = equation.predict(x)
 y = model.predict(x)
+print(ys)
 print(y)
