@@ -96,7 +96,7 @@ def find_max_dis(cluster1, cluster2):
     return np.max(real_dis)
 
 
-if __name__ =="__main__":
+if __name__ == "__main__":
     a = np.array([[1,1, 1], [0, 0, 1], [2,3, 2], [4,7,1]])
     b = np.array([[2,1,1], [0, 0,2], [1,1,1]])
     print(find_min_dis(a, b))
