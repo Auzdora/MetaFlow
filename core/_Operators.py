@@ -53,7 +53,8 @@ class Exp(Operator):
         return np.exp(np.array(tensors[0]))
 
     def compute_jacobi(self, parent):
-        return
+        exp_val = np.exp(parent.value).flatten()
+        return np.diag(exp_val)
 
 
 class Sigmoid(Operator):
@@ -74,8 +75,8 @@ class Sigmoid(Operator):
         """
         e = 1 / np.exp(parent.value)
         g = np.array(1 / (1 + e))
-        diag = (g * (1 - g)).flatten()
-        return np.diag(diag)
+        d_sig = (g * (1 - g)).flatten()
+        return np.diag(d_sig)
 
 
 class Add(Operator):
