@@ -42,3 +42,22 @@ class LossMSE(BaseLoss):
     def compute_jacobi(self, parent):
         # TODO:Explain here why we need add .T
         return self.jacobi_coef * (parent.value - self.label).T
+
+
+class CrossEntropy(BaseLoss):
+    """
+        Cross entropy loss function.
+    """
+    def __init__(self, label, outputs):
+        self.label = np.expand_dims(label, axis=1)
+
+        # Number of samples
+        self.N = len(label)
+        self.jacobi_coef = 2 / self.N
+        super(CrossEntropy, self).__init__(*[outputs], grad_fn='<CrossEntropyLoss>', special_op=True)
+
+    def compute_value(self, *args):
+        pass
+
+    def compute_jacobi(self, *args):
+        pass
