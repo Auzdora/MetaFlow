@@ -25,3 +25,15 @@ class Sigmoid(Modules):
 
     def get_module_info(self):
         print("Sigmoid layer")
+
+
+class ReLU(Modules):
+    def __init__(self):
+        self.core_module = True
+        super(ReLU, self).__init__(self.core_module)
+
+    def forward(self, x):
+        pass
+
+    def get_module_info(self):
+        print("ReLU layer")
