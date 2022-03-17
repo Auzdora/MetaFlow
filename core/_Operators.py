@@ -38,7 +38,7 @@ class Sum(Operator):
         return np.array(tensors[0]).sum()
 
     def compute_jacobi(self, parent):
-        return np.ones((1, parent.shape[0]))
+        return np.ones((1, parent.shape[0] * parent.shape[1]))
 
 
 class Exp(Operator):
@@ -92,7 +92,7 @@ class Add(Operator):
         return np.add(*tensors_list)
 
     def compute_jacobi(self, parent):
-        return np.array(np.eye(self.shape[0]))
+        return np.array(np.eye(self.shape[0] * self.shape[1]))
 
 
 class Minus(Operator):
@@ -109,7 +109,7 @@ class Minus(Operator):
         return np.add(*tensors)
 
     def compute_jacobi(self, parent):
-        return np.array(np.eye(self.shape[0]))
+        return np.array(np.eye(self.shape[0] * self.shape[1]))
 
 
 class Mul(Operator):
@@ -127,6 +127,10 @@ class Mul(Operator):
         return np.multiply(*tensors)
 
     def compute_jacobi(self, parent):
+        if parent is self.parents[0]:
+            other_parent = self.parents[1]
+        else:
+            other_parent = self.parents[0]
         pass
 
 

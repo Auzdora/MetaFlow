@@ -142,8 +142,11 @@ class Tensor:
         """
         # If this graph node is last node in compute graph, that means it has no children
         if len(self.children) == 0:
-            if self.grad_fn == '<TensorAdd>' or self.grad_fn == '<TensorSigmoid>' or self.grad_fn == '<TensorExp>':
-                self.grad = np.array(np.eye(self.shape[0]))
+            if self.grad_fn == '<TensorAdd>':
+                self.grad = np.array(np.eye(self.shape[0] * self.shape[1]))
+
+            if self.grad_fn == '<TensorSigmoid>' or self.grad_fn == '<TensorExp>':
+                self.grad = np.array(np.eye(self.shape[0] * self.shape[1]))
 
             if self.grad_fn == '<TensorSum>' or self.grad_fn == '<LossMSE>' or self.grad_fn == '<TensorMatMul>':
                 self.grad = 1
