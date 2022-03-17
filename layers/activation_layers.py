@@ -12,6 +12,12 @@ from core import Tensor, Modules, F
 
 
 class Sigmoid(Modules):
+    """
+        Sigmoid layer, a core module,could be instantiated when users define
+    their own model.
+        Sigmoid function g(x) = 1 / ( 1 + e^-x).
+        Its derivative function g'(x) = g(x) (1 - g(x)).
+    """
     def __init__(self):
         self.core_module = True
         super(Sigmoid, self).__init__(self.core_module)
