@@ -31,7 +31,7 @@ class Sum(Operator):
     """
     def __init__(self, tensor):
         # tensor is a <__main__.Tensor object at 0x7f77c0770100>
-        super(Sum, self).__init__(tensor, grad_fn='<TensorSum>', special_op=True)
+        super(Sum, self).__init__(tensor, grad_fn='<TensorSum>', special_op=True, grad_require=True)
 
     def compute_value(self, *args):
         tensors = self.connect_tensor(args[0])
@@ -39,6 +39,43 @@ class Sum(Operator):
 
     def compute_jacobi(self, parent):
         return np.ones((1, parent.shape[0]))
+
+
+class Exp(Operator):
+    """
+        Exponential operator.
+    """
+    def __init__(self, tensor):
+        super(Exp, self).__init__(tensor, grad_fn='<TensorExp>', special_op=True, grad_require=True)
+
+    def compute_value(self, *args):
+        tensors = self.connect_tensor(args[0])
+        return np.exp(np.array(tensors[0]))
+
+    def compute_jacobi(self, parent):
+        return
+
+
+class Sigmoid(Operator):
+    """
+        Sigmoid: g(x) = 1 / (1 + exp(-x))
+    """
+    def __init__(self, tensor):
+        super(Sigmoid, self).__init__(tensor, grad_fn='<TensorSigmoid>', special_op=True, grad_require=True)
+
+    def compute_value(self, *args):
+        tensors = self.connect_tensor(args[0])
+        e = 1 / np.exp(tensors[0])
+        return 1 / (1 + e)
+
+    def compute_jacobi(self, parent):
+        """
+            g'(x) = g(x) (1 - g(x))
+        """
+        e = 1 / np.exp(parent.value)
+        g = np.array(1 / (1 + e))
+        diag = (g * (1 - g)).flatten()
+        return np.diag(diag)
 
 
 class Add(Operator):

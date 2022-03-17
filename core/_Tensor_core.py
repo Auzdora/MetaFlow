@@ -74,7 +74,10 @@ class Tensor:
 
         elif self.grad_fn in OP_LIST:
             if self.special_op:
-                return np.expand_dims(self.compute_value(*args), axis=0)
+                if self.grad_fn == '<TensorSum>':
+                    return np.expand_dims(self.compute_value(*args), axis=0)
+                if self.grad_fn == '<TensorSigmoid>' or self.grad_fn == '<LossMSE>':
+                    return self.compute_value(*args)
             else:
                 return self.compute_value(*args)
 
@@ -139,10 +142,10 @@ class Tensor:
         """
         # If this graph node is last node in compute graph, that means it has no children
         if len(self.children) == 0:
-            if self.grad_fn == '<TensorAdd>':
+            if self.grad_fn == '<TensorAdd>' or self.grad_fn == '<TensorSigmoid>':
                 self.grad = np.array(np.eye(self.shape[0]))
 
-            if self.grad_fn == '<TensorSum>' or self.grad_fn == '<LossMSE>' or '<TensorMatMul>':
+            if self.grad_fn == '<TensorSum>' or self.grad_fn == '<LossMSE>' or self.grad_fn == '<TensorMatMul>':
                 self.grad = 1
 
         # If this node doesn't have parent node, that means it has no need to backpropagation

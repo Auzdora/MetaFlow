@@ -11,7 +11,7 @@ import time
 
 import numpy as np
 from core import Modules, Tensor
-from layers import Linear
+from layers import Linear, Sigmoid
 from loss_fn import LossMSE
 from opt import SGD
 
@@ -48,12 +48,17 @@ class Model(Modules):
         self.layer1 = Linear(in_features=3, out_features=3)
         self.layer2 = Linear(in_features=3, out_features=2)
         self.layer3 = Linear(in_features=2, out_features=1)
+
+        self.sig = Sigmoid()
         super(Model, self).__init__()
 
     def forward(self, x):
         x = self.layer1(x)
+        x = self.sig(x)
         x = self.layer2(x)
+        x = self.sig(x)
         x = self.layer3(x)
+
         return x
 
 
@@ -63,7 +68,7 @@ model = Model()
 model.get_model_info()
 optimizer = SGD(model, learning_rate=0.01)
 # Start to train
-for epoch in range(100):
+for epoch in range(1000):
     mean_loss = 0
     for i in range(len(train_set)):
         x = Tensor(np.array(train_set[i, :-1]).T)
