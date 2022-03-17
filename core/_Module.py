@@ -34,9 +34,13 @@ class Modules:
     def __setattr__(self, key, value):
         """
             Record model's trainable parameters into self._parameters: -> dict
+        This would be
         """
         if isinstance(value, OrderedDict):
             if self.core_module:
+                # if this is core module, for instance, Sigmoid, Linear and so on,
+                # it mean this object is not user defined model but instead it is
+                # defined by developers, which is core module
                 pass
             else:
                 self.__dict__[key] = value
@@ -45,9 +49,11 @@ class Modules:
                 for layers in self.__dict__:
                     module_layer_cnt += 1
 
+                    # skip 'self.core_module' attribute
                     if isinstance(self.__dict__[layers], bool):
                         continue
                     else:
+                        # layers is a object too
                         layers_dict = self.__dict__[layers].__dict__
                         for params_name in layers_dict:
                             if isinstance(layers_dict[params_name], Tensor):
