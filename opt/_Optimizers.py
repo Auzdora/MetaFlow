@@ -38,6 +38,10 @@ class BGD(Optimizer):
     """
         Batch Gradient Descent.
     """
+    def __init__(self, model, batch_size, lr):
+        super(BGD, self).__init__(model, lr)
+        self.batch_size = batch_size
+
     def update(self):
         pass
 
@@ -56,8 +60,8 @@ class MiniBGD(Optimizer):
     """
         Mini-Batch Gradient Descent.
     """
-    def __init__(self, batch_size, learning_rate):
-        super(MiniBGD, self).__init__(learning_rate)
+    def __init__(self, model, batch_size, learning_rate):
+        super(MiniBGD, self).__init__(model, learning_rate)
         self.batch_size = batch_size
 
     def update(self):
