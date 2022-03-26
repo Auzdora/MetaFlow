@@ -52,6 +52,8 @@ class Modules:
                     # skip 'self.core_module' attribute
                     if isinstance(self.__dict__[layers], bool):
                         continue
+                    if isinstance(self.__dict__[layers], OrderedDict):
+                        continue
                     else:
                         # layers is a object too
                         layers_dict = self.__dict__[layers].__dict__
