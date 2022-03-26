@@ -29,7 +29,7 @@ class Sigmoid(Modules):
             x = Tensor(x)
             return F.sigmoid(x)
 
-    def get_module_info(self):
+    def _get_module_info(self):
         print("Sigmoid layer")
 
 
@@ -41,5 +41,5 @@ class ReLU(Modules):
     def forward(self, x):
         pass
 
-    def get_module_info(self):
+    def _get_module_info(self):
         print("ReLU layer")

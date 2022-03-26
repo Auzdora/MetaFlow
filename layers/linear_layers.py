@@ -35,7 +35,7 @@ class Linear(Modules):
             x = Tensor(x)
             return F.fully_connected_layer(x, self.weight, self.bias)
 
-    def get_module_info(self):
+    def _get_module_info(self):
         """
             Have to rewrite when you define a brand new layers in 'layers'
         directory.

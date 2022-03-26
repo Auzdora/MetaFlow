@@ -92,11 +92,11 @@ class Modules:
             print('-' * 50)
             print(">>> Layer name:{} ".format(name))
             print('')
-            layers.get_module_info()
+            layers._get_module_info()
             print('-' * 50)
 
     @abc.abstractmethod
-    def get_module_info(self):
+    def _get_module_info(self):
         """
             For developers,You have to rewrite this method when you create a new module.
             This method is layer-wise information (that means, you could only rewrite this
