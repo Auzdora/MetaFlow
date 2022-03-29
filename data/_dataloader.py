@@ -21,12 +21,34 @@ class DataLoader:
         If you want to use this class, you have write a subclass and let it inherits from
         DataLoader.
     """
-    def __init__(self, datasets, batch_size, shuffle=False):
+    def __init__(self, dataset, batch_size, shuffle=False):
         self.batch_size = batch_size
         self.shuffle = shuffle
 
+        self._counter = 0
+
+        if self.shuffle:
+            self.dataset = dataset
+            np.random.shuffle(self.dataset.data)
+        else:
+            self.dataset = dataset
+
     def __iter__(self):
-        pass
+        return self
 
     def __next__(self):
-        pass
+        if self._counter * self.batch_size >= len(self.dataset):
+            raise StopIteration
+        else:
+            input_batch = []
+            target_batch = []
+            for index in range(self.batch_size):
+                _indexor = self._counter * self.batch_size + index
+                if _indexor < len(self.dataset):
+                    _data, _label = self.dataset[_indexor]
+                    input_batch.append(_data)
+                    target_batch.append(_label)
+                else:
+                    break
+            self._counter += 1
+            return np.array(input_batch), np.array(target_batch)
