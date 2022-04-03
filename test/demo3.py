@@ -80,11 +80,11 @@ class Model(Modules):
 past = time.time()
 model = Model()
 train_data = Myset(train_set)
-dataloader = DataLoader(train_data, 2, shuffle=True)
+dataloader = DataLoader(train_data, 1, shuffle=True)
 model.get_model_info()
 optimizer = SGD(model, learning_rate=0.01)
 # Start to train
-for epoch in range(300):
+for epoch in range(3000):
     mean_loss = 0
     cnt = 0
     for data, label in dataloader:

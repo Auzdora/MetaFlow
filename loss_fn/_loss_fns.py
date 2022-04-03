@@ -32,13 +32,13 @@ class LossMSE(BaseLoss):
         # Number of samples
         self.N = len(label)
 
-        self.jacobi_coef = 2
+        self.jacobi_coef = 1
         super(LossMSE, self).__init__(*[outputs], grad_fn='<LossMSE>', special_op=True)
 
     def compute_value(self, *args):
         # TODO: Add assert to make sure label dim equals to output dim
         outputs = self.connect_tensor(args[0])
-        return (((outputs[0]-self.label)**2).sum())/self.N
+        return (((outputs[0].squeeze(-1) - self.label)**2).sum())/self.N
 
     def compute_jacobi(self, parent):
         # TODO:Explain here why we need add .T
