@@ -16,7 +16,7 @@ from core import Tensor, Modules
 
 from layers import Linear
 from loss_fn import LossMSE
-from opt import SGD, BGD, MiniBGD
+from opt import SGD
 from data import DataLoader, Dataset
 
 
@@ -56,18 +56,19 @@ class LinearRegression:
         :param dataset:
         :param opt: you could choose 'SGD','BGD','MBGD' for this version.
         """
-        self.dataset = LinearData(dataset)
-        # dataset params
-        self.data_num = len(self.dataset)
-        self.data_dim = self.dataset.dims
-
-        self.LinearLoader = DataLoader(self.dataset, 1)
+        self.dataset = dataset
+        self.data_dim = self.dataset.shape[1]
         self.normalization = normalization
 
         if self.normalization:
             self.mean_container, self.std_container = self._normalize()
         else:
             pass
+
+        self.datasets = LinearData(dataset)
+        # dataset params
+        self.data_num = len(self.datasets)
+        self.LinearLoader = DataLoader(self.datasets, 1)
 
         # model
         self.model = LinearModel(in_features=self.data_dim-1, out_features=1)
@@ -102,18 +103,16 @@ class LinearRegression:
         """
         for epoch in range(iteration_num):
             mean_loss = 0
-            for i in range(self.data_num):
-                x = Tensor(np.array(self.dataset[i, :-1]).T)
-                target = np.expand_dims(np.array(self.dataset[i, -1]), axis=0)
-                output = self.model(x)
-                loss = LossMSE(target, output)
+            cnt = 0
+            for data, label in self.LinearLoader:
+                output = self.model(Tensor(data))
+                loss = LossMSE(label, output)
                 loss.backward()
                 self.optimizer.update()
                 mean_loss += loss.value
-                if epoch == iteration_num-1 and i == self.data_num -1:
-                    continue
+                cnt += 1
                 loss.clear()
-            print("epoch{}: loss:{}".format(epoch, mean_loss / self.data_num))
+            print("epoch{}: loss:{}".format(epoch, mean_loss / cnt))
 
     def predict(self, data):
         data = np.array(data)
@@ -124,6 +123,7 @@ class LinearRegression:
             data = (data - mean)/std
         output = []
         for input in data:
+            input = np.expand_dims(np.expand_dims(input, axis=0),axis=-1)
             output.append(float(self.model(input).value))
         if self.normalization:
             out_mean = np.tile(self.mean_container[-1], (1, data.shape[0])).squeeze(0)

@@ -25,13 +25,14 @@ dataset = data_loader(data_path)
 # normal equation
 equation = NormalEquation(dataset)
 # linear regression
-model = LinearRegression(dataset, lr=0.00003, normalization=True)
-model.train(13000)
+model = LinearRegression(dataset, lr=0.00001, normalization=True)
+model.train(20000)
 model.get_model_info()
 
 # predict
+xs = [[2104, 3], [4478, 5], [852, 2]]
 x = [[2104, 3], [4478, 5], [852, 2]]
-ys = equation.predict(x)
+ys = equation.predict(xs)
 y = model.predict(x)
 print(ys)
 print(y)
