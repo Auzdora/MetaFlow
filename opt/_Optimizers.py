@@ -34,18 +34,6 @@ class Optimizer(abc.ABC):
         raise NotImplementedError("optimizer update method undefined, you have to write it.")
 
 
-class BGD(Optimizer):
-    """
-        Batch Gradient Descent.
-    """
-    def __init__(self, model, batch_size, lr):
-        super(BGD, self).__init__(model, lr)
-        self.batch_size = batch_size
-
-    def update(self):
-        pass
-
-
 class SGD(Optimizer):
     """
         Stochastic Gradient Descent.
@@ -54,18 +42,6 @@ class SGD(Optimizer):
     def update(self):
         for name, params in self.model.parameters():
             params.value = params.value - self.learning_rate * params.grad.reshape(params.shape)
-
-
-class MiniBGD(Optimizer):
-    """
-        Mini-Batch Gradient Descent.
-    """
-    def __init__(self, model, batch_size, learning_rate):
-        super(MiniBGD, self).__init__(model, learning_rate)
-        self.batch_size = batch_size
-
-    def update(self):
-        pass
 
 
 class Momentum(Optimizer):
