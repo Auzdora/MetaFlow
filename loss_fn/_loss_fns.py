@@ -32,7 +32,7 @@ class LossMSE(BaseLoss):
         # Number of samples
         self.N = len(label)
 
-        self.jacobi_coef = 1
+        self.jacobi_coef = 2
         super(LossMSE, self).__init__(*[outputs], grad_fn='<LossMSE>', special_op=True)
 
     def compute_value(self, *args):

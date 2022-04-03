@@ -8,6 +8,7 @@
     Created by Melrose-Lbt 2022-3-6
 """
 from core import Tensor, Modules, F
+import numpy as np
 
 
 class Linear(Modules):
@@ -15,17 +16,26 @@ class Linear(Modules):
         Linear layers (Fully connected layers) for neural network.
     """
 
-    def __init__(self, in_features, out_features, bias=True):
+    def __init__(self, in_features, out_features, bias=True, init_para='xavier_normal'):
+        """
+        :param in_features:
+        :param out_features:
+        :param bias:
+        :param init_para: It could be:
+                            'normal', 'xavier_normal', 'uniform', 'xavier_uniform'
+                          By default, system will use normal.
+        """
         self.core_module = True
         self.in_features = in_features
         self.out_features = out_features
+        self.init_para = init_para
         self.weight = Tensor((1, out_features, in_features), grad_require=True)
         if bias:
             # TODO: 1 could be expanded if coding for batch
             self.bias = Tensor((out_features, 1), grad_require=True)
         else:
             self.bias = None
-
+        self.reset_parameters()
         super(Linear, self).__init__(self.core_module)
 
     def forward(self, x):
@@ -45,3 +55,26 @@ class Linear(Modules):
         print('In features dim: {}       Out features dim: {}'.format(self.in_features, self.out_features))
         print("Weight:\n{}".format(self.weight.value))
         print("Bias:\n{}".format(self.bias.value))
+
+    def reset_parameters(self):
+        """
+            Reset network's parameters. To make network easier to learn.
+        :return:
+        """
+        if self.init_para == 'normal':
+            self.weight.value = np.random.normal(loc=0., scale=1., size=(1, self.out_features, self.in_features))
+            if self.bias is None:
+                pass
+            else:
+                self.bias.value = np.random.normal(loc=0., scale=1., size=(self.out_features, 1))
+        elif self.init_para == 'xavier_normal':
+            std = np.sqrt(2./(self.in_features + self.out_features))
+            self.weight.value = np.random.normal(loc=0., scale=std, size=(1, self.out_features, self.in_features))
+            if self.bias is None:
+                pass
+            else:
+                self.bias.value = np.random.normal(loc=0., scale=std, size=(self.out_features, 1))
+        elif self.init_para == 'uniform':
+            pass
+        elif self.init_para == 'xavier_uniform':
+            pass

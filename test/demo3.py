@@ -61,17 +61,18 @@ class Myset(Dataset):
 class Model(Modules):
     def __init__(self):
         self.layer1 = Linear(in_features=3, out_features=3)
+        self.sig1 = Sigmoid()
         self.layer2 = Linear(in_features=3, out_features=2)
+        self.sig2 = Sigmoid()
         self.layer3 = Linear(in_features=2, out_features=1)
 
-        self.sig = Sigmoid()
         super(Model, self).__init__()
 
     def forward(self, x):
         x = self.layer1(x)
-        x = self.sig(x)
+        x = self.sig1(x)
         x = self.layer2(x)
-        x = self.sig(x)
+        x = self.sig2(x)
         x = self.layer3(x)
 
         return x

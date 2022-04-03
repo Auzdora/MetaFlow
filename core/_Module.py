@@ -131,3 +131,10 @@ class Modules:
         :param x: Tensor input
         :return: Tensor output
         """
+
+    @abc.abstractmethod
+    def reset_parameters(self):
+        """
+            For Developers:
+            You need to override your layers' parameters initial method.
+        """
