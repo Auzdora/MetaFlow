@@ -75,6 +75,16 @@ class Linear(Modules):
             else:
                 self.bias.value = np.random.normal(loc=0., scale=std, size=(self.out_features, 1))
         elif self.init_para == 'uniform':
-            pass
+            _bound = np.sqrt(1. / self.in_features)
+            self.weight.value = np.random.uniform(low=-_bound, high=_bound, size=(1, self.out_features, self.in_features))
+            if self.bias is None:
+                pass
+            else:
+                self.bias.value = np.random.uniform(low=-_bound, high=_bound, size=(self.out_features, 1))
         elif self.init_para == 'xavier_uniform':
-            pass
+            _bound = np.sqrt(6. / self.in_features + self.out_features)
+            self.weight.value = np.random.uniform(low=-_bound, high=_bound, size=(1, self.out_features, self.in_features))
+            if self.bias is None:
+                pass
+            else:
+                self.bias.value = np.random.uniform(low=-_bound, high=_bound, size=(self.out_features, 1))
