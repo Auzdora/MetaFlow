@@ -12,12 +12,12 @@
 import numpy as np
 from numpy import ndarray
 import matplotlib.pyplot as plt
-from core import Tensor
+from core import Tensor, Modules
 
-from core import Modules
 from layers import Linear
 from loss_fn import LossMSE
 from opt import SGD, BGD, MiniBGD
+from data import DataLoader, Dataset
 
 
 class LinearModel(Modules):

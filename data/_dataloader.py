@@ -38,6 +38,7 @@ class DataLoader:
 
     def __next__(self):
         if self._counter * self.batch_size >= len(self.dataset):
+            self._counter = 0
             raise StopIteration
         else:
             input_batch = []

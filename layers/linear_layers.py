@@ -19,7 +19,7 @@ class Linear(Modules):
         self.core_module = True
         self.in_features = in_features
         self.out_features = out_features
-        self.weight = Tensor((out_features, in_features), grad_require=True)
+        self.weight = Tensor((1, out_features, in_features), grad_require=True)
         if bias:
             # TODO: 1 could be expanded if coding for batch
             self.bias = Tensor((out_features, 1), grad_require=True)

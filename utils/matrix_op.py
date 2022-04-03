@@ -23,10 +23,10 @@ def renew_to_diag(container, parent_tensor, w_or_x=True):
     # Get important parameters
     if w_or_x:
         # If w_or_x is true, that means we are compute dY/dW where Y=WX
-        value_t = parent_tensor.value.T
+        value_t = parent_tensor.T
     else:
         # If w_or_x is false, that means we are compute dY/dX where Y=WX
-        value_t = parent_tensor.value
+        value_t = parent_tensor
     row_step = value_t.shape[0]
     col_step = value_t.shape[1]
     iter_num = container.shape[0]/row_step

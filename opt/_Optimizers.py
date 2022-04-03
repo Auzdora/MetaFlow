@@ -52,8 +52,8 @@ class SGD(Optimizer):
     """
 
     def update(self):
-        for params in self.model.parameters():
-            params[1].value = params[1].value - self.learning_rate * params[1].grad.reshape(params[1].shape)
+        for name, params in self.model.parameters():
+            params.value = params.value - self.learning_rate * params.grad.reshape(params.shape)
 
 
 class MiniBGD(Optimizer):

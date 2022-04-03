@@ -10,17 +10,19 @@
 """
 from core import Tensor
 from core import Sigmoid, Sum, MatMul, Exp, Mul, Add
+import numpy as np
 
-a = Tensor([[0.1, 0.1], [0.2, 0.2], [0.3, 0.3]])
-c = Tensor([[0.1, 0.2, 0.1], [0.2, 0.1, 0]], grad_require=True)
-s = Tensor([[1, 1], [1, 1]], grad_require=True)
+a = Tensor([[[0.1, 0.1], [0.2, 0.2], [0.3, 0.3]]])
+c = Tensor([[[0.1, 0.2, 0.1], [0.2, 0.1, 0]]], grad_require=True)
+s = Tensor([[0, 1], [1, 1]], grad_require=True)
 d = MatMul(c, a)
 l = Add(d, s)
 b = Exp(l)
 m = Sigmoid(b)
-print(m)
 k = Sum(m)
-print(k)
+print(l)
+# print(k)
 k.backward()
 print(c.grad)
-c.value = c.value - 0.01 * c.grad.reshape(2, 3)
+# c.value = c.value - 0.01 * c.grad.reshape(2, 3)
+

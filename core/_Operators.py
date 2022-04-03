@@ -38,7 +38,7 @@ class Sum(Operator):
         return np.array(tensors[0]).sum()
 
     def compute_jacobi(self, parent):
-        return np.ones((1, parent.shape[0] * parent.shape[1]))
+        return np.ones((1, parent.shape[1] * parent.shape[2]))
 
 
 class Exp(Operator):
@@ -53,8 +53,14 @@ class Exp(Operator):
         return np.exp(np.array(tensors[0]))
 
     def compute_jacobi(self, parent):
-        exp_val = np.exp(parent.value).flatten()
-        return np.diag(exp_val)
+        _tCounter, _tSummer = 0, 0
+        for _subTensor in parent.value:
+            print(_subTensor)
+            exp_val = np.exp(parent.value).flatten()
+            _tSummer += np.diag(exp_val)
+            _tCounter += 1
+
+        return _tSummer/_tCounter
 
 
 class Sigmoid(Operator):
@@ -73,10 +79,14 @@ class Sigmoid(Operator):
         """
             g'(x) = g(x) (1 - g(x))
         """
-        e = 1 / np.exp(parent.value)
-        g = np.array(1 / (1 + e))
-        d_sig = (g * (1 - g)).flatten()
-        return np.diag(d_sig)
+        _tCounter, _tSummer = 0, 0
+        for _subTensor in parent.value:
+            e = 1 / np.exp(_subTensor)
+            g = np.array(1 / (1 + e))
+            d_sig = (g * (1 - g)).flatten()
+            _tSummer += np.diag(d_sig)
+            _tCounter += 1
+        return _tSummer/_tCounter
 
 
 class Add(Operator):
@@ -92,7 +102,7 @@ class Add(Operator):
         return np.add(*tensors_list)
 
     def compute_jacobi(self, parent):
-        return np.array(np.eye(self.shape[0] * self.shape[1]))
+        return np.array(np.eye(self.shape[1] * self.shape[2]))
 
 
 class Minus(Operator):
@@ -109,7 +119,7 @@ class Minus(Operator):
         return np.add(*tensors)
 
     def compute_jacobi(self, parent):
-        return np.array(np.eye(self.shape[0] * self.shape[1]))
+        return np.array(np.eye(self.shape[1] * self.shape[2]))
 
 
 class Mul(Operator):
@@ -146,14 +156,14 @@ class MatMul(Operator):
     def compute_value(self, *args):
         # Define relationship
         tensors = self.connect_tensor(*args)
-        return np.matmul(*tensors)
+        return np.einsum('kij,bjn->bin', *tensors)
 
     def compute_jacobi(self, parent):
         # If self.shape is one dimensional vector, choose this
         # TODO: Add doc, explain this code blocks
         # Two important parameters
-        self_index_num = self.shape[0] * self.shape[1]
-        parent_index_num = parent.shape[0] * parent.shape[1]
+        self_index_num = self.shape[1] * self.shape[2]
+        parent_index_num = parent.shape[1] * parent.shape[2]
 
         # Build container
         container = np.zeros((self_index_num, parent_index_num))
@@ -162,16 +172,25 @@ class MatMul(Operator):
         # dY / dW situation
         if parent is self.parents[0]:
             other_parent = self.parents[1]
-            return utils.renew_to_diag(container, other_parent)
+            _tCounter, _tSummer = 0, 0
+            for _subTensor in other_parent.value:
+                _tSummer += utils.renew_to_diag(container, _subTensor)
+                _tCounter += 1
+            return _tSummer/_tCounter
         # dY / dX situation
         else:
             other_parent = self.parents[0]
-            jacobi = utils.renew_to_diag(container, other_parent, w_or_x=False)
-            row_order = np.arange(0, self_index_num).reshape(self.shape[1], self.shape[0]).\
-                T.reshape(self_index_num)
-            col_order = np.arange(0, parent_index_num).reshape(parent.shape[1], parent.shape[0]).\
-                T.reshape(parent_index_num)
-            return jacobi[row_order, :][:, col_order]
+            _tCounter, _tSummer = 0, 0
+            for _subTensor in other_parent.value:
+                jacobi = utils.renew_to_diag(container, _subTensor, w_or_x=False)
+                row_order = np.arange(0, self_index_num).reshape(self.shape[2], self.shape[1]).\
+                    T.reshape(self_index_num)
+                col_order = np.arange(0, parent_index_num).reshape(parent.shape[2], parent.shape[1]).\
+                    T.reshape(parent_index_num)
+                _tSummer += jacobi[row_order, :][:, col_order]
+                _tCounter += 1
+
+            return _tSummer/_tCounter
 
 
 if __name__ == "__main__":
