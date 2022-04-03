@@ -20,6 +20,23 @@ from opt import SGD, BGD, MiniBGD
 from data import DataLoader, Dataset
 
 
+class LinearData(Dataset):
+    def __init__(self, dataset):
+        if isinstance(dataset, ndarray):
+            self.data = dataset
+        else:
+            self.data = np.array(dataset)
+        self.dims = self.data.shape[1]
+
+    def __len__(self):
+        return len(self.data)
+
+    def __getitem__(self, index):
+        input_data = np.expand_dims(self.data[:, :-1], axis=-1)
+        label = self.data[:, -1]
+        return input_data[index], label[index]
+
+
 class LinearModel(Modules):
     def __init__(self, in_features, out_features):
         self.layer = Linear(in_features=in_features, out_features=out_features)
@@ -39,13 +56,12 @@ class LinearRegression:
         :param dataset:
         :param opt: you could choose 'SGD','BGD','MBGD' for this version.
         """
-        if isinstance(dataset, ndarray):
-            self.dataset = dataset
-        else:
-            self.dataset = np.array(dataset)
+        self.dataset = LinearData(dataset)
         # dataset params
-        self.data_num = self.dataset.shape[0]
-        self.data_dim = self.dataset.shape[1]
+        self.data_num = len(self.dataset)
+        self.data_dim = self.dataset.dims
+
+        self.LinearLoader = DataLoader(self.dataset, 1)
         self.normalization = normalization
 
         if self.normalization:
