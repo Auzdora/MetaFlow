@@ -82,9 +82,9 @@ model = Model()
 train_data = Myset(train_set)
 dataloader = DataLoader(train_data, 1, shuffle=True)
 model.get_model_info()
-optimizer = SGD(model, learning_rate=0.01)
+optimizer = SGD(model, lr=0.01, rmsprop=True)
 # Start to train
-for epoch in range(3000):
+for epoch in range(20):
     mean_loss = 0
     cnt = 0
     for data, label in dataloader:
@@ -103,5 +103,6 @@ now = time.time()
 print("run time:{}s".format(now - past))
 # Some examples to predict
 # TODO: Add predict method for model, train model, test model.
-print(model(Tensor([prepro(158, height), prepro(47, weight), prepro(22, bfrs)])))
-print(model(Tensor([prepro(178, height), prepro(90, weight), prepro(15, bfrs)])))
+
+print(model(Tensor([[[prepro(158, height)], [prepro(47, weight)], [prepro(22, bfrs)]]])))
+print(model(Tensor([[[prepro(178, height)], [prepro(90, weight)], [prepro(15, bfrs)]]])))
