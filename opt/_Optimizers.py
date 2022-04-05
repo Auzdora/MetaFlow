@@ -179,16 +179,3 @@ class Adam(Optimizer):
                 self.s[p_name] = self.s[p_name] / (1 - self.beta_2 ** self.t)
 
             params.value = params.value - self.lr * self.v[p_name] / np.sqrt(self.s[p_name] + self.epsilon)
-
-
-if __name__ == "__main__":
-    x = dict()
-
-    name = ['1', '2', '3', '4', '5', '6', '7']
-    v = 0
-
-    for i in name:
-        x[i] = v
-        v += 2
-
-    print(x)
