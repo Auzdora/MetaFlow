@@ -7,39 +7,13 @@
 
     Created by Melrose-Lbt 2022-3-5
 """
-import abc
-
 import numpy as np
+from _OptBase import Optimizer
 
-from core import Modules
 
 beta_1 = 0.9  # momentum decay ratio / RMSProp decay ratio / Adam decay ratio_1
 beta_2 = 0.99  # Adam decay ratio_2
 Epsilon = 1e-10  # infinite min value
-
-
-class Optimizer(abc.ABC):
-    """
-        Abstract class for optimizers.
-    """
-
-    def __init__(self, model, learning_rate=0.001):
-        if learning_rate < 0.0:
-            raise ValueError("learning rate value should be positive value.")
-        assert isinstance(model, Modules), \
-            "input model is not a Modules class."
-        # Access to all the leaf nodes that are gradable.
-        # Number of gradable leaf nodes.
-        self.model = model
-        self.learning_rate = learning_rate
-
-    @abc.abstractmethod
-    def update(self):
-        """
-            Params update method, need to be implemented when you create a
-        sub class. Gradient descent is baseline.
-        """
-        raise NotImplementedError("optimizer update method undefined, you have to write it.")
 
 
 class SGD(Optimizer):
