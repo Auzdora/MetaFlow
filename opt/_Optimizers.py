@@ -103,7 +103,37 @@ class SGD(Optimizer):
 
 
 class Adam(Optimizer):
+    """
+        Adam optimizer:
+            Adam is an optimization algorithm that can be used instead of the classical stochastic
+        gradient descent procedure to update network weights iterative based in training data.
+
+            Adam realizes the benefits of both AdaGrad and RMSProp.Instead of adapting the parameter
+        learning rates based on the average first moment (the mean) as in RMSProp, Adam also makes
+        use of the average of the second moments of the gradients (the uncentered variance).
+
+            Specifically, the algorithm calculates an exponential moving average of the gradient
+        and the squared gradient, and the parameters beta1 and beta2 control the decay rates of
+        these moving averages.The initial value of the moving averages and beta1 and beta2 values
+        close to 1.0 (recommended) result in a bias of moment estimates towards zero. This bias is
+        overcome by first calculating the biased estimates before then calculating bias-corrected
+        estimates.The paper is quite readable and I would encourage you to read it if you are
+        interested in the specific implementation details.
+
+            In this method, by default, adam parameters are:
+            learning rate: 0.001
+            beta_1: 0.9
+            beta_2: 0.99
+            epsilon: 1e-8
+            bias correction: False
+            weight decay: 0
+
+            TIPs: Bias correction make sure the denominator is not zero at the beginning of training
+        process. This correction effect will decay overtime.
+            Weight decay is L2 regularization method.
+    """
     def __init__(self, model, lr=0.001, betas=(0.9, 0.99), epsilon=1e-8, bias_fix=False, weight_decay=0):
+        # TODO: Understand Regularization and add 'weight_decay' to Adam
         self.model = model
         self.lr = lr
         self.epsilon = epsilon
@@ -122,6 +152,16 @@ class Adam(Optimizer):
         super(Adam, self).__init__(model, learning_rate=lr)
 
     def update(self):
+        """
+            Update logic. It goes like this:
+            1. g = dLoss / dw
+            2. g^2 = g * g
+            3. v_{t} = beta_1 * v_{t-1} + (1 - beta_1) * g
+            4. s_{t} = beta_2 * s_{t-1} + (1 - beta_2) * g
+            5. ( bias correction ) v_{t} = v_{t-1} / (1 - beta_1 ^ t)
+            6. ( bias correction ) s_{t} = s_{t-1} / (1 - beta_2 ^ t)
+            7. w = w - lr * v_{t} / (sqrt(s_{t} + epsilon))
+        """
         self.t += 1
         for p_name, params in self.model.parameters():
             g = params.grad.reshape(params.shape)
