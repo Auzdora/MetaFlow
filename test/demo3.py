@@ -15,7 +15,7 @@ import numpy as np
 from core import Modules, Tensor
 from layers import Linear, Sigmoid
 from loss_fn import LossMSE
-from opt import SGD
+from opt import SGD, Adam
 from data import DataLoader, Dataset
 
 # Prepare data
@@ -82,9 +82,9 @@ model = Model()
 train_data = Myset(train_set)
 dataloader = DataLoader(train_data, 1, shuffle=True)
 model.get_model_info()
-optimizer = SGD(model, lr=0.01, rmsprop=True)
+optimizer = Adam(model, lr=0.001)
 # Start to train
-for epoch in range(20):
+for epoch in range(200):
     mean_loss = 0
     cnt = 0
     for data, label in dataloader:
