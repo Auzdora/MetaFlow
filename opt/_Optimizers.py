@@ -23,6 +23,10 @@ class SGD(Optimizer):
 
     def __init__(self, model, lr=0.001, beta=0.9, epsilon=1e-10, ratio_decay=False, momentum=False,
                  adagrad=False, rmsprop=False):
+
+        assert 0 < beta < 1, "beta should be positive value range from 0 to 1"
+        assert epsilon < 1e-5, "epsilon should be as small as possible, at least small than 1e-5"
+
         # model and learning rate
         self.model = model
         self.lr = lr
@@ -108,11 +112,17 @@ class Adam(Optimizer):
     """
     def __init__(self, model, lr=0.001, betas=(0.9, 0.99), epsilon=1e-8, bias_fix=False, weight_decay=0):
         # TODO: Understand Regularization and add 'weight_decay' to Adam
+
+        assert epsilon < 1e-5, "epsilon should be as small as possible, at least small than 1e-5"
+
         self.model = model
         self.lr = lr
         self.epsilon = epsilon
         self.beta_1 = betas[0]
+        assert 0 < self.beta_1 < 1, "beta_{} should be positive value range from 0 to 1".format(1)
         self.beta_2 = betas[1]
+        assert 0 < self.beta_2 < 1, "beta_{} should be positive value range from 0 to 1".format(2)
+
         self.weight_decay = weight_decay
 
         # iterate counter
