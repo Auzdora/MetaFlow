@@ -17,6 +17,7 @@ from layers import Linear, Sigmoid
 from loss_fn import LossMSE
 from opt import SGD, Adam
 from data import DataLoader, Dataset
+import matplotlib.pyplot as plt
 
 # Prepare data
 male_heights = np.random.normal(171, 2, 500)
@@ -77,14 +78,15 @@ class Model(Modules):
         return x
 
 
+loss_val, epochs = [], []
 past = time.time()
 model = Model()
 train_data = Myset(train_set)
-dataloader = DataLoader(train_data, 1, shuffle=True)
+dataloader = DataLoader(train_data, 2, shuffle=True)
 model.get_model_info()
 optimizer = Adam(model, lr=0.001)
 # Start to train
-for epoch in range(200):
+for epoch in range(2000):
     mean_loss = 0
     cnt = 0
     for data, label in dataloader:
@@ -98,11 +100,14 @@ for epoch in range(200):
         loss.clear()
 
     print("epoch{}: loss:{}".format(epoch, mean_loss / cnt))
+    loss_val.append(mean_loss / cnt)
+    epochs.append(epoch)
 
 now = time.time()
 print("run time:{}s".format(now - past))
 # Some examples to predict
 # TODO: Add predict method for model, train model, test model.
-
+plt.plot(epochs, loss_val)
+plt.show()
 print(model(Tensor([[[prepro(158, height)], [prepro(47, weight)], [prepro(22, bfrs)]]])))
 print(model(Tensor([[[prepro(178, height)], [prepro(90, weight)], [prepro(15, bfrs)]]])))
