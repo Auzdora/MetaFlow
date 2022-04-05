@@ -8,7 +8,7 @@
     Created by Melrose-Lbt 2022-3-5
 """
 import numpy as np
-from _OptBase import Optimizer
+from ._OptBase import Optimizer
 
 
 beta_1 = 0.9  # momentum decay ratio / RMSProp decay ratio / Adam decay ratio_1
