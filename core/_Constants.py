@@ -1,6 +1,6 @@
 # Operator Register List
 OP_LIST = ['<TensorSum>', '<TensorAdd>', '<TensorMinus>', '<TensorMul>', '<TensorMatMul>', '<TensorSigmoid>',
-           '<TensorExp>',
+           '<TensorExp>', '<TensorSoftmax>',
 
            '<LossMSE>', '<CrossEntropyLoss>']
 # Module Footprint List

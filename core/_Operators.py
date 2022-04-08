@@ -173,24 +173,44 @@ class MatMul(Operator):
         if parent is self.parents[0]:
             other_parent = self.parents[1]
             _tCounter, _tSummer = 0, 0
+
             for _subTensor in other_parent.value:
                 _tSummer += utils.renew_to_diag(container, _subTensor)
                 _tCounter += 1
+
             return _tSummer/_tCounter
+
         # dY / dX situation
         else:
             other_parent = self.parents[0]
             _tCounter, _tSummer = 0, 0
+
             for _subTensor in other_parent.value:
                 jacobi = utils.renew_to_diag(container, _subTensor, w_or_x=False)
+
                 row_order = np.arange(0, self_index_num).reshape(self.shape[2], self.shape[1]).\
                     T.reshape(self_index_num)
                 col_order = np.arange(0, parent_index_num).reshape(parent.shape[2], parent.shape[1]).\
                     T.reshape(parent_index_num)
+
                 _tSummer += jacobi[row_order, :][:, col_order]
                 _tCounter += 1
 
             return _tSummer/_tCounter
+
+
+class SoftMax(Operator):
+    def __init__(self, *args):
+        super(SoftMax, self).__init__(*args, grad_fn='<TensorSoftmax>', grad_require=True)
+
+    def compute_value(self, *args):
+        tensors = self.connect_tensor(*args)
+        _e = np.exp(tensors[0])
+        _out = _e / np.sum(_e, axis=1)
+        return _out
+
+    def compute_jacobi(self, parent):
+        pass
 
 
 if __name__ == "__main__":

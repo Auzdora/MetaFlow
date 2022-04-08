@@ -76,7 +76,8 @@ class Tensor:
             if self.special_op:
                 if self.grad_fn == '<TensorSum>':
                     return np.expand_dims(self.compute_value(*args), axis=0)
-                if self.grad_fn == '<TensorSigmoid>' or self.grad_fn == '<LossMSE>' or self.grad_fn == '<TensorExp>':
+                if self.grad_fn == '<TensorSigmoid>' or self.grad_fn == '<LossMSE>' or self.grad_fn == '<TensorExp>' \
+                        or self.grad_fn == '<TensorSoftmax>':
                     return self.compute_value(*args)
             else:
                 return self.compute_value(*args)
