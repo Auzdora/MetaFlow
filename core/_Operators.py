@@ -206,8 +206,10 @@ class SoftMax(Operator):
     def compute_value(self, *args):
         tensors = self.connect_tensor(*args)
         _e = np.exp(tensors[0])
-        _out = _e / np.sum(_e, axis=1)
-        return _out
+        p = []
+        for index, inputs in enumerate(_e):
+            p.append(inputs / np.sum(inputs, axis=0))
+        return np.array(p)
 
     def compute_jacobi(self, parent):
         _tCounter, _tSummer = 0, 0

@@ -11,20 +11,20 @@
 from core import Tensor
 from core import Sigmoid, Sum, MatMul, Exp, Mul, Add, SoftMax
 import numpy as np
-from loss_fn import LossMSE
+from loss_fn import LossMSE, CrossEntropy
 
-label = [[2, 1], [1, 3]]
+label = [[0, 1, 0, 0], [0, 0, 1, 0]]
 a = Tensor([[[1], [2], [1]], [[1], [1], [1]]])
-c = Tensor([[[2, 2, 1], [2, 1, 0]]], grad_require=True)
-s = Tensor([[0], [1]], grad_require=True)
+c = Tensor([[[2, 2, 1], [2, 1, 0], [-1, 1, 1], [-2, 1, 2]]], grad_require=True)
+s = Tensor([[0], [1], [1], [-1]], grad_require=True)
 d = MatMul(c, a)
 l = Add(d, s)
 o = SoftMax(l)
 loss = LossMSE(label, o)
 loss.backward()
-print(o)
 print(loss)
 print(o.grad)
+print(c.grad)
 
 
 

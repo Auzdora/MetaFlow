@@ -36,23 +36,26 @@ class LossMSE(BaseLoss):
             label = np.array(label)
 
         if len(label.shape) == 1:
+            # one label 0 or 1
+            self.N = 1
             self.label = np.expand_dims(label, axis=0)
         else:
+            # multi [0, 0, 1, ..., 0] one hot label
+            # if it is batch, it has to construct like this shape    [batch, label_dim]
+            self.N = label.shape[1]
             self.label = label.T
 
-        # Number of samples
-        self.batch = len(label)
-
-        self.jacobi_coef = 1
+        self.jacobi_coef = 2/self.N
         super(LossMSE, self).__init__(*[outputs], grad_fn='<LossMSE>', special_op=True)
 
     def compute_value(self, *args):
         # TODO: Add assert to make sure label dim equals to output dim
         outputs = self.connect_tensor(args[0])
-        _tSummer = 0
+        _tSummer, _tCounter = 0, 0
         for index, output in enumerate(outputs[0]):
             _tSummer += ((output - np.expand_dims(self.label[:, index], axis=1)) ** 2).mean()
-        return _tSummer/self.batch
+            _tCounter += 1
+        return _tSummer/_tCounter
 
     def compute_jacobi(self, parent):
         # TODO:Explain here why we need add .T
@@ -68,15 +71,25 @@ class CrossEntropy(BaseLoss):
         Cross entropy loss function.
     """
     def __init__(self, label, outputs):
-        self.label = np.expand_dims(label, axis=1)
+        if isinstance(label, ndarray):
+            pass
+        else:
+            label = np.array(label)
+        self.label = label
 
-        # Number of samples
-        self.N = len(label)
-        self.jacobi_coef = 2 / self.N
         super(CrossEntropy, self).__init__(*[outputs], grad_fn='<CrossEntropyLoss>', special_op=True)
 
     def compute_value(self, *args):
-        pass
+        outputs = self.connect_tensor(args[0])
+        _tSummer, _tCounter = 0, 0
+        for index, _one_batch_data in enumerate(outputs[0]):
+            _tSummer += - np.sum(np.multiply(self.label[index], np.log(_one_batch_data).squeeze(1)))
+            _tCounter += 1
+        return _tSummer / _tCounter
 
-    def compute_jacobi(self, *args):
-        pass
+    def compute_jacobi(self, parent):
+        _tCounter, _tSummer = 0, 0
+        for index, _subTensor in enumerate(parent.value):
+            _tSummer += - self.label[index] / _subTensor.squeeze(1)
+            _tCounter += 1
+        return np.expand_dims(_tSummer, axis=0) / _tCounter

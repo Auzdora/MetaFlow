@@ -77,7 +77,7 @@ class Tensor:
                 if self.grad_fn == '<TensorSum>':
                     return np.expand_dims(self.compute_value(*args), axis=0)
                 if self.grad_fn == '<TensorSigmoid>' or self.grad_fn == '<LossMSE>' or self.grad_fn == '<TensorExp>' \
-                        or self.grad_fn == '<TensorSoftmax>':
+                        or self.grad_fn == '<TensorSoftmax>' or self.grad_fn == '<CrossEntropyLoss>':
                     return self.compute_value(*args)
             else:
                 return self.compute_value(*args)
@@ -153,7 +153,8 @@ class Tensor:
             if self.grad_fn == '<TensorSigmoid>' or self.grad_fn == '<TensorExp>':
                 self.grad = np.array(np.eye(self.shape[0] * self.shape[1]))
 
-            if self.grad_fn == '<TensorSum>' or self.grad_fn == '<LossMSE>' or self.grad_fn == '<TensorMatMul>':
+            if self.grad_fn == '<TensorSum>' or self.grad_fn == '<LossMSE>' or self.grad_fn == '<TensorMatMul>' \
+                    or self.grad_fn == '<CrossEntropyLoss>':
                 self.grad = 1
 
         # If this node doesn't have parent node, that means it has no need to backpropagation
