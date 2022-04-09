@@ -16,7 +16,7 @@ class Linear(Modules):
         Linear layers (Fully connected layers) for neural network.
     """
 
-    def __init__(self, in_features, out_features, bias=True, init_para='xavier_normal'):
+    def __init__(self, in_features, out_features, bias=True, init_para='xavier_uniform'):
         """
         :param in_features:
         :param out_features:
@@ -61,6 +61,7 @@ class Linear(Modules):
             Reset network's parameters. To make network easier to learn.
         :return:
         """
+        # TODO: Confirm and pack them into a single file
         if self.init_para == 'normal':
             self.weight.value = np.random.normal(loc=0., scale=1., size=(1, self.out_features, self.in_features))
             if self.bias is None:

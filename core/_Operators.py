@@ -210,7 +210,14 @@ class SoftMax(Operator):
         return _out
 
     def compute_jacobi(self, parent):
-        pass
+        _tCounter, _tSummer = 0, 0
+        for _subTensor in self.value:
+            diag = _subTensor.T
+            Y = np.diag(diag.squeeze(0))
+            Y_2 = np.matmul(_subTensor, _subTensor.T)
+            _tSummer += Y - Y_2
+            _tCounter += 1
+        return _tSummer / _tCounter
 
 
 if __name__ == "__main__":
