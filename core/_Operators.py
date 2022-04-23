@@ -222,5 +222,21 @@ class SoftMax(Operator):
         return _tSummer / _tCounter
 
 
+class Conv2D(Operator):
+    def __init__(self, *args, **kwargs):
+        self.bias = kwargs['bias']
+        self.stride = kwargs['stride']
+        self.padding = kwargs['padding']
+        super(Conv2D, self).__init__(*args, grad_fn='<TensorConv>', grad_require=True)
+
+    def compute_value(self, *args):
+        tensors = self.connect_tensor(*args)
+        print(tensors)
+        print(self.bias)
+
+    def compute_jacobi(self, parent):
+        pass
+
+
 if __name__ == "__main__":
     pass

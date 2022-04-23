@@ -7,7 +7,7 @@
 
     Created by Melrose-Lbt 2022-3-6
 """
-from core import Add, MatMul, Sigmoid
+from core import Add, MatMul, Sigmoid, Conv2D
 
 
 def fully_connected_layer(input, weight, bias):
@@ -37,3 +37,16 @@ def sigmoid(input):
     :return:
     """
     return Sigmoid(input)
+
+
+def convolution_2d(input, kernels, bias, stride, padding):
+    """
+    :param input:
+    :return:
+    """
+    kwargs = {
+        'bias': bias,
+        'stride': stride,
+        'padding': padding
+    }
+    return Conv2D(input, kernels, **kwargs)
