@@ -8,7 +8,7 @@
 
     Created by Melrose-Lbt 2022-3-17
 """
-from core import Tensor
+from core import Tensor, F
 from core import Sigmoid, Sum, MatMul, Exp, Mul, Add, SoftMax
 from layers import Conv2D
 import numpy as np
@@ -28,7 +28,7 @@ from loss_fn import LossMSE, CrossEntropy
 # print(c.grad)
 
 img = Tensor((1, 1, 255, 255))
-conv = Conv2D(in_channels=1, out_channels=3, kernel_size=3, stride=1, padding=1, _bias=True)
+conv = Conv2D(in_channels=1, out_channels=3, kernel_size=3, stride=1, padding=3, _bias=True)
 output = conv(img)
 
 

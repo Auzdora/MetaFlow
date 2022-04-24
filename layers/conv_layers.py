@@ -14,7 +14,7 @@ from core import Tensor, Modules, F
 class Conv2D(Modules):
     """
         2 dimensional convolution layers.
-        Input data size should be four dimensional, [ Batch, channel, Weight, Height ]
+        Input data size should be four dimensional, [ Batch, channel, Height, Weight ]
     other input size is unacceptable.
     """
     def __init__(self, in_channels, out_channels, kernel_size, stride, padding, _bias):
