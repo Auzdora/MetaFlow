@@ -27,9 +27,10 @@ from loss_fn import LossMSE, CrossEntropy
 # print(o.grad)
 # print(c.grad)
 
-img = Tensor((1, 1, 255, 255))
-conv = Conv2D(in_channels=1, out_channels=3, kernel_size=3, stride=1, padding=3, _bias=True)
+img = Tensor((4, 3, 255, 255))
+conv = Conv2D(in_channels=3, out_channels=64, kernel_size=3, stride=1, padding=1, _bias=True)
 output = conv(img)
+print(output)
 
 
 

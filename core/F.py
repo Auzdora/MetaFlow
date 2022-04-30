@@ -42,7 +42,7 @@ def sigmoid(input):
     return Sigmoid(input)
 
 
-def convolution_2d(input, kernels, bias, stride, padding):
+def convolution_2d(input, kernels, **kwargs):
     """
         Packing useful parameters all together into kwargs.
         Padding input Tensor based on 'padding' params.
@@ -54,10 +54,7 @@ def convolution_2d(input, kernels, bias, stride, padding):
         :param stride: step
         :param padding: 0 padding number
     """
-    kwargs = {
-        'bias': bias,
-        'stride': stride,
-    }
+    padding = kwargs['padding']
     input.value = zero_padding(input.value, padding_size=padding)
     input.shape = input.value.shape
     return Conv2D(input, kernels, **kwargs)

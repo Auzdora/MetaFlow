@@ -226,15 +226,55 @@ class Conv2D(Operator):
     def __init__(self, *args, **kwargs):
         self.bias = kwargs['bias']
         self.stride = kwargs['stride']
+        self.kernel_size = kwargs['kernel_size']
+        self.in_channels = kwargs['in_channels']
+        self.out_channels = kwargs['out_channels']
+
+        self.output_h = None
+        self.output_w = None
+
         super(Conv2D, self).__init__(*args, grad_fn='<TensorConv>', grad_require=True)
 
     def compute_value(self, *args):
         tensors = self.connect_tensor(*args)
-        print(tensors)
-        print(self.bias)
+        _input, _kernel = tensors[0], tensors[1]
+        N, C, H, W = _input.shape
+
+        # output shape define
+        self.output_h = (H - self.kernel_size) / self.stride + 1
+        self.output_w = (W - self.kernel_size) / self.stride + 1
+
+        assert self.output_h % 1 == 0, "output H must be integer"
+        assert self.output_w % 1 == 0, "output W must be integer"
+        self.output_h = int(self.output_h)
+        self.output_w = int(self.output_w)
+
+        _img = self.columize(_input)
+
+        output = np.dot(_img, _kernel.reshape(self.out_channels, -1).transpose(1, 0))
+
+        output += self.bias.value.T
+        output = output.reshape((N, self.output_w * self.output_h, self.out_channels)).transpose(0, 2, 1). \
+            reshape((N, self.out_channels, self.output_h, self.output_w))
+
+        return output
 
     def compute_jacobi(self, parent):
         pass
+
+    def columize(self, image):
+        """
+            Columize the input high-dimensional image to a 2D matrix.
+        """
+        N, C, H, W = image.shape
+        cols = []
+        for i in range(0, H - self.kernel_size + 1, self.stride):
+            for j in range(0, W - self.kernel_size + 1, self.stride):
+                col = image[:, :, i:i + self.kernel_size, j:j + self.kernel_size].reshape(N, -1)
+                cols.append(col)
+        columize_img = np.array(cols)
+
+        return columize_img.transpose((1, 0, 2)).reshape(-1, C * self.kernel_size * self.kernel_size)
 
 
 if __name__ == "__main__":
