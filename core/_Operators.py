@@ -224,6 +224,7 @@ class SoftMax(Operator):
 
 class Conv2D(Operator):
     def __init__(self, *args, **kwargs):
+        self.padded = args[0].value # input padded image
         self.bias = kwargs['bias']
         self.stride = kwargs['stride']
         self.kernel_size = kwargs['kernel_size']
@@ -232,6 +233,8 @@ class Conv2D(Operator):
 
         self.output_h = None
         self.output_w = None
+
+        self.origin_shape = None
 
         super(Conv2D, self).__init__(*args, grad_fn='<TensorConv>', grad_require=True)
 
@@ -257,10 +260,60 @@ class Conv2D(Operator):
         output = output.reshape((N, self.output_w * self.output_h, self.out_channels)).transpose(0, 2, 1). \
             reshape((N, self.out_channels, self.output_h, self.output_w))
 
+        self.origin_shape = output.shape  # prevent reshape operation destroy the original information
         return output
 
     def compute_jacobi(self, parent):
-        pass
+        back_images = self.parents[0]
+        kernels = self.parents[1]
+
+        N, C, H, W = self.origin_shape
+        O, I, Kh, Kw = kernels.shape
+        _Kh, _Kw = int(Kh / 2), int(Kw / 2)
+
+        if parent is back_images:
+            _tCounter, _tSummer = 0, 0
+
+            # Batch-wise loop
+            for sub_kernels in kernels.value:
+                # Channel-wise loop
+                jacobis = []
+                for kernel in sub_kernels:
+                    ph, pw = tuple(np.add((H, W), np.multiply((_Kh, _Kw), 2)))
+                    _jabobi = []
+                    for i in np.arange(_Kw, _Kw + W):
+                        for j in np.arange(_Kh, _Kh + H):
+                            mask = np.mat(np.zeros((pw, ph)))
+                            mask[i - _Kw:i - _Kw + Kw, j - _Kh:j - _Kh + Kh] = kernel
+                            _jabobi.append(mask[_Kw:_Kw + W, _Kh:_Kh + H].A1)
+                    jacobis.append(np.mat(_jabobi))
+                jacobis = np.array(jacobis)
+                _tSummer += jacobis
+                _tCounter += 1
+
+            return _tSummer / _tCounter
+
+        elif parent is kernels:
+            _tCounter, _tSummer = 0, 0
+
+            # Batch-wise loop
+            for b_index, sub_images in enumerate(back_images.value):
+                # Channel-wise loop
+                jacobis = []
+                for c_index, image in enumerate(sub_images):
+                    _jabobi = []
+                    for i in np.arange(_Kw, _Kw + W):
+                        for j in np.arange(_Kh, _Kh + H):
+                            _jabobi.append(np.mat(self.padded[b_index][c_index][i - _Kw:i - _Kw + Kw, \
+                                                  j - _Kh:j - _Kh + Kh]).A1)
+                    jacobis.append(np.mat(_jabobi))
+                jacobis = np.array(jacobis).repeat(O, axis=1)  # output kernels number
+                _tSummer += jacobis
+                _tCounter += 1
+
+            return _tSummer / _tCounter
+
+
 
     def columize(self, image):
         """

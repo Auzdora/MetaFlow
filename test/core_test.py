@@ -10,11 +10,12 @@
 """
 from core import Tensor, F
 from core import Sigmoid, Sum, MatMul, Exp, Mul, Add, SoftMax
-from layers import Conv2D
+from layers import Conv2D, Linear
 import numpy as np
 from loss_fn import LossMSE, CrossEntropy
 
-# label = [[0, 1, 0, 0], [0, 0, 1, 0]]
+label = [[0, 1, 0, 0], [0, 0, 1, 0]]
+linear = Linear(in_features=72, out_features=4)
 # a = Tensor([[[1], [2], [1]], [[1], [1], [1]]])
 # c = Tensor([[[2, 2, 1], [2, 1, 0], [-1, 1, 1], [-2, 1, 2]]], grad_require=True)
 # s = Tensor([[0], [1], [1], [-1]], grad_require=True)
@@ -27,10 +28,19 @@ from loss_fn import LossMSE, CrossEntropy
 # print(o.grad)
 # print(c.grad)
 
-img = Tensor((4, 3, 255, 255))
-conv = Conv2D(in_channels=3, out_channels=64, kernel_size=3, stride=1, padding=1, _bias=True)
-output = conv(img)
-print(output)
+img = Tensor((2, 2, 6, 6))
+conv = Conv2D(in_channels=2, out_channels=2, kernel_size=3, stride=1, padding=1, _bias=True)
+x = conv(img)
+print(x)
+x.value = x.value.reshape(2, -1, 1)
+x.shape = x.value.shape
+lx = linear(x)
+out = SoftMax(lx)
+loss = LossMSE(label, out)
+loss.backward()
+print(loss)
+print(x.grad)
+
 
 
 
