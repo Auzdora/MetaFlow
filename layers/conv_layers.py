@@ -64,9 +64,10 @@ class Conv2D(Modules):
         """
         # TODO: Confirm and pack them into a single file
         if self.init_para == 'normal':
-            self.kernels.value = np.random.normal(loc=0., scale=1., size=(self.out_channels, self.in_channels,
+            self.kernels.value = np.random.normal(loc=0., scale=0.05, size=(self.out_channels, self.in_channels,
                                                                           self.kernel_size, self.kernel_size))
+            print(self.kernels.value)
             if self.bias is None:
                 pass
             else:
-                self.bias.value = np.random.normal(loc=0., scale=1., size=(self.out_channels, 1))
+                self.bias.value = np.random.normal(loc=0., scale=0.05, size=(self.out_channels, 1))

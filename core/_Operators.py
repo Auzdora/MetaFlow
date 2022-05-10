@@ -224,7 +224,7 @@ class SoftMax(Operator):
 
 class Conv2D(Operator):
     def __init__(self, *args, **kwargs):
-        self.padded = args[0].value # input padded image
+        self.padded = args[0].value  # input padded image
         self.bias = kwargs['bias']
         self.stride = kwargs['stride']
         self.kernel_size = kwargs['kernel_size']
@@ -233,6 +233,7 @@ class Conv2D(Operator):
 
         self.output_h = None
         self.output_w = None
+        self.padding = kwargs['padding']
 
         self.origin_shape = None
 
@@ -285,7 +286,8 @@ class Conv2D(Operator):
                         for j in np.arange(_Kh, _Kh + H):
                             mask = np.mat(np.zeros((pw, ph)))
                             mask[i - _Kw:i - _Kw + Kw, j - _Kh:j - _Kh + Kh] = kernel
-                            _jabobi.append(mask[_Kw:_Kw + W, _Kh:_Kh + H].A1)
+                            # _jabobi.append(mask[_Kw:_Kw + W, _Kh:_Kh + H].A1)
+                            _jabobi.append(mask.A1)
                     jacobis.append(np.mat(_jabobi))
                 jacobis = np.array(jacobis)
                 _tSummer += jacobis
@@ -307,13 +309,13 @@ class Conv2D(Operator):
                             _jabobi.append(np.mat(self.padded[b_index][c_index][i - _Kw:i - _Kw + Kw, \
                                                   j - _Kh:j - _Kh + Kh]).A1)
                     jacobis.append(np.mat(_jabobi))
-                jacobis = np.array(jacobis).repeat(O, axis=1)  # output kernels number
+
+                # TODO: This is wrong maybe. - Sun May 1 00:52
+                jacobis = np.array(jacobis)
                 _tSummer += jacobis
                 _tCounter += 1
 
             return _tSummer / _tCounter
-
-
 
     def columize(self, image):
         """

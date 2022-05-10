@@ -161,7 +161,26 @@ class Tensor:
         if len(self.parents) > 0:
             for parent in self.parents:
                 if parent.grad_require:
-                    parent.grad = np.dot(self.grad, self.compute_jacobi(parent))
+
+                    if self.grad_fn == '<TensorConv>' and parent.grad_fn == '<TensorConv>':
+                        jacobi = self.compute_jacobi(parent)
+                        if len(self.grad.shape) == 2:  # means it connects Linear and Conv
+                            self.grad = np.expand_dims(self.grad, axis=0).repeat(self.in_channels,axis=0)
+                        padding_grad = np.einsum('ijk, ikl->ijl', self.grad, jacobi)
+                        # eliminate padding
+                        grad = np.reshape(padding_grad, (self.in_channels, self.output_h + 2*self.padding, self.output_w+2*self.padding)) \
+                            [:, self.padding:self.output_h + self.padding, self.padding:self.output_w + self.padding]
+                        parent.grad = np.reshape(grad, (self.in_channels, 1, -1))
+
+                    elif self.grad_fn == '<TensorConv>' and parent.grad_fn is None:
+                        self.grad = np.expand_dims(self.grad, axis=1).repeat(self.in_channels, axis=1)
+                        jacobi = self.compute_jacobi(parent)
+                        self_grad = np.expand_dims(jacobi, axis=0).repeat(self.out_channels, axis=0)
+                        grad = np.einsum('ijkl, ijlm->ijkm', self.grad, self_grad)
+                        parent.grad = grad
+
+                    else:
+                        parent.grad = np.dot(self.grad, self.compute_jacobi(parent))
                     parent.backward()
                 else:
                     continue
