@@ -168,7 +168,8 @@ class Tensor:
                             self.grad = np.expand_dims(self.grad, axis=0).repeat(self.in_channels,axis=0)
                         padding_grad = np.einsum('ijk, ikl->ijl', self.grad, jacobi)
                         # eliminate padding
-                        grad = np.reshape(padding_grad, (self.in_channels, self.output_h + 2*self.padding, self.output_w+2*self.padding)) \
+                        grad = np.reshape(padding_grad,
+                            (self.in_channels, self.output_h + 2*self.padding, self.output_w+2*self.padding)) \
                             [:, self.padding:self.output_h + self.padding, self.padding:self.output_w + self.padding]
                         parent.grad = np.reshape(grad, (self.in_channels, 1, -1))
 

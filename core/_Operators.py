@@ -332,5 +332,15 @@ class Conv2D(Operator):
         return columize_img.transpose((1, 0, 2)).reshape(-1, C * self.kernel_size * self.kernel_size)
 
 
+class MaxPooling(Operator):
+    def __init__(self):
+        pass
+
+    def compute_value(self, *args):
+        pass
+
+    def compute_jacobi(self, parent):
+        pass
+
 if __name__ == "__main__":
     pass

@@ -74,3 +74,8 @@ def zero_padding(in_array, padding_size=0):
     padding_array[:, :, padding_size:rows + padding_size, padding_size:cols + padding_size] = in_array
 
     return padding_array
+
+
+def maxpooling(input):
+
+    return Max

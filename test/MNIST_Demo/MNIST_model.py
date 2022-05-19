@@ -8,7 +8,7 @@
     Created by Melrose-Lbt 2022-4-5
 """
 from core import Modules, Tensor
-from layers import Linear, Sigmoid
+from layers import Linear, Sigmoid, Conv2D
 from loss_fn import LossMSE
 import numpy as np
 
@@ -30,6 +30,12 @@ class MNIST_Net(Modules):
         x = self.linear3(x)
 
         return x
+    
+    
+class Conv_MINIST_Net(Modules):
+    def __init__(self):
+
+        super(Conv_MINIST_Net, self).__init__()
 
 
 if __name__ == "__main__":
